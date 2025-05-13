@@ -9,26 +9,19 @@ use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 
 final class CoordinateResult extends BaseResult implements \shared\galaxygames\ovommand\fetus\result\ISucceedResult{
-	public const TYPE_DEFAULT = 0; //plain number
+	public const TYPE_DEFAULT  = 0; //plain number
 	public const TYPE_RELATIVE = 1; //tilde
-	public const TYPE_LOCAL = 2; //caret notation
+	public const TYPE_LOCAL    = 2; //caret notation
 
-	protected int $xType;
-	protected int $yType;
-	protected int $zType;
-
-	protected float | int $x;
-	protected float | int $y;
-	protected float | int $z;
+	protected int $xType, $yType, $zType;
+	protected float | int $x, $y, $z;
 
 	protected bool $hasCaret;
-	protected bool $isBlockPos; //TODO: deal with this later
 
-	public function __construct(float|int $x, float|int $y, float|int $z, int $xType = self::TYPE_DEFAULT, int $yType = self::TYPE_DEFAULT, int $zType = self::TYPE_DEFAULT, bool $isBlockPos = false){
+	public function __construct(float|int $x, float|int $y, float|int $z, int $xType = self::TYPE_DEFAULT, int $yType = self::TYPE_DEFAULT, int $zType = self::TYPE_DEFAULT){
 		$this->x = $x;
 		$this->y = $y;
 		$this->z = $z;
-		$this->isBlockPos = $isBlockPos;
 
 		$this->xType = match ($xType) {
 			self::TYPE_DEFAULT => self::TYPE_DEFAULT,
