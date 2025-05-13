@@ -7,10 +7,9 @@ function test_parse_speed(string $input, string $pattern) : array {
 //	var_dump($nunOfMatches);
 }
 
+require_once "../../vendor/autoload.php";
 require_once "../../src/galaxygames/ovommand/parameter/ParameterParser.php";
 use galaxygames\ovommand\parameter\ParameterParser;
-
-require_once "../../vendor/autoload.php";
 
 $patterns = [
 	"G00T1" => "([^~^+\-\d\s]*[+-]?)([~^]?[+-]?\d+(?:\.\d+)?|[~^])([+-]*?[^^~\d\s]*)",
