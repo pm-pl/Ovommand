@@ -9,46 +9,28 @@ use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 
 final class CoordinateResult extends BaseResult implements \shared\galaxygames\ovommand\fetus\result\ISucceedResult{
-	public const TYPE_DEFAULT  = 0; //plain number
-	public const TYPE_RELATIVE = 1; //tilde
+	public const TYPE_DEFAULT  = 0; //number
+	public const TYPE_RELATIVE = 1; //tilde notation
 	public const TYPE_LOCAL    = 2; //caret notation
 
-	protected int $xType, $yType, $zType;
-	protected float | int $x, $y, $z;
-
-	protected bool $hasCaret;
-
-	public function __construct(float|int $x, float|int $y, float|int $z, int $xType = self::TYPE_DEFAULT, int $yType = self::TYPE_DEFAULT, int $zType = self::TYPE_DEFAULT){
-		$this->x = $x;
-		$this->y = $y;
-		$this->z = $z;
-
-		$this->xType = match ($xType) {
-			self::TYPE_DEFAULT => self::TYPE_DEFAULT,
-			self::TYPE_RELATIVE => self::TYPE_RELATIVE,
-			self::TYPE_LOCAL => self::TYPE_LOCAL,
-			default => throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "x", "type" => (string) $xType]))
-		};
-		$this->yType = match ($yType) {
-			self::TYPE_DEFAULT => self::TYPE_DEFAULT,
-			self::TYPE_RELATIVE => self::TYPE_RELATIVE,
-			self::TYPE_LOCAL => self::TYPE_LOCAL,
-			default => throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "y", "type" => (string) $yType]))
-		};
-		$this->zType = match ($zType) {
-			self::TYPE_DEFAULT => self::TYPE_DEFAULT,
-			self::TYPE_RELATIVE => self::TYPE_RELATIVE,
-			self::TYPE_LOCAL => self::TYPE_LOCAL,
-			default => throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "z", "type" => (string) $zType]))
-		};
-		$this->hasCaret = $this->xType === self::TYPE_LOCAL || $this->yType === self::TYPE_LOCAL || $this->zType === self::TYPE_LOCAL;
-		if (!($this->xType === self::TYPE_LOCAL && $this->yType === self::TYPE_LOCAL && $this->zType === self::TYPE_LOCAL) && $this->hasCaret) {
+	public function __construct(protected float|int $x = 0, protected float|int $y = 0, protected float|int $z = 0, protected int $xType = self::TYPE_DEFAULT, protected int $yType = self::TYPE_DEFAULT, protected int $zType = self::TYPE_DEFAULT){
+		if ($xType !== self::TYPE_DEFAULT && $xType !== self::TYPE_RELATIVE && $xType !== self::TYPE_LOCAL) {
+			throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "x", "type" => (string) $xType]));
+		}
+		if ($yType !== self::TYPE_DEFAULT && $yType !== self::TYPE_RELATIVE && $yType !== self::TYPE_LOCAL) {
+			throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "y", "type" => (string) $yType]));
+		}
+		if ($zType !== self::TYPE_DEFAULT && $zType !== self::TYPE_RELATIVE && $zType !== self::TYPE_LOCAL) {
+			throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_INVALID_TYPE->translate(["name" => "z", "type" => (string) $zType]));
+		}
+		$localCount = (int) (($xType === self::TYPE_LOCAL) + ($yType === self::TYPE_LOCAL) + ($zType === self::TYPE_LOCAL));
+		if ($localCount === 1 || $localCount === 2) {
 			throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_COLLIDED_TYPE->value);
 		}
 	}
 
-	public static function fromData(float|int $x, float|int $y, float|int $z, int $xType = self::TYPE_DEFAULT, int $yType = self::TYPE_DEFAULT, int $zType = self::TYPE_DEFAULT, bool $isBlockPos = false) : self{
-		return new CoordinateResult($x, $y, $z, $xType, $yType, $zType, $isBlockPos);
+	public static function create(float|int $x = 0, float|int $y = 0, float|int $z = 0, int $xType = self::TYPE_DEFAULT, int $yType = self::TYPE_DEFAULT, int $zType = self::TYPE_DEFAULT) : self{
+		return new CoordinateResult($x, $y, $z, $xType, $yType, $zType);
 	}
 
 	public static function here() : self{
@@ -64,80 +46,56 @@ final class CoordinateResult extends BaseResult implements \shared\galaxygames\o
 			if ($entity === null) {
 				throw new \InvalidArgumentException(MessageParser::EXCEPTION_COORDINATE_RESULT_ENTITY_REQUIRED->value);
 			}
-			if ($this->hasCaret) {
-				return $this->parseLocal($entity);
+			if ($this->xType === self::TYPE_LOCAL) {
+				return $this->asLocalPosition($entity);
 			}
-			return $this->parseRelative($entity);
+			return $this->asRelativePosition($entity);
 		}
 		return new Position($this->x, $this->y, $this->z, $entity?->getWorld());
 	}
 
 	public function asBlockPosition(Entity $entity = null) : Position{
-		$pos = $this->asPosition($entity);
-		$pos->x = $pos->getFloorX();
-		$pos->y = $pos->getFloorY();
-		$pos->z = $pos->getFloorZ();
-		return $pos;
+		return Position::fromObject($this->asPosition($entity)->floor(), $entity->getWorld());
 	}
 
-	private function parseRelative(Entity $entity) : Position{
-		$pos = $entity->getPosition();
-		if ($this->xType === self::TYPE_RELATIVE) {
-			$pos->add($this->x, 0, 0);
-		}
-		if ($this->yType === self::TYPE_RELATIVE) {
-			$pos->add(0, $this->y, 0);
-		}
-		if ($this->zType === self::TYPE_RELATIVE) {
-			$pos->add(0, 0, $this->z);
-		}
-
-		return $pos;
+	private function asRelativePosition(Entity $entity) : Position{
+		return Position::fromObject($entity->getPosition()->add($this->x, $this->y, $this->z), $entity->getWorld());
 	}
 
-	public function getUpSideDirectionVector(Entity $entity) : Vector3{
-		$pitch = $entity->getLocation()->pitch + 90;
-		$yaw = $entity->getLocation()->yaw;
-		$y = -sin(deg2rad($pitch));
-		$xz = cos(deg2rad($pitch));
-		$x = -$xz * sin(deg2rad($yaw));
-		$z = $xz * sin(deg2rad($yaw));
+	private function getUpSideDirectionVector(Entity $entity) : Vector3{
+		$location = $entity->getLocation();
+		$pitchRad = deg2rad($location->pitch + 90); // rotate 90 degrees to get the up direction
+		$yawRad = deg2rad($location->yaw);
+		$y = -sin($pitchRad);
+		$xz = cos($pitchRad);
+		$x = -$xz * sin($yawRad);
+		$z = $xz * sin($yawRad);
 
 		return (new Vector3($x, $y, $z))->normalize();
 	}
 
-	public function getLeftSideDirectionVector(Entity $entity) : Vector3{
-		$pitch = $entity->getLocation()->pitch;
-		$yaw = $entity->getLocation()->yaw + 90; //Left?
-		$y = -sin(deg2rad($pitch));
-		$xz = cos(deg2rad($pitch));
-		$x = -$xz * sin(deg2rad($yaw));
-		$z = $xz * sin(deg2rad($yaw));
+	private function getLeftSideDirectionVector(Entity $entity) : Vector3{
+		$location = $entity->getLocation();
+		$pitchRad = deg2rad($location->pitch);
+		$yawRad = deg2rad($location->yaw + 90); // rotate 90 degrees to get the left direction
+		$y = -sin($pitchRad);
+		$xz = cos($pitchRad);
+		$x = -$xz * sin($yawRad);
+		$z = $xz * sin($yawRad);
 
 		return (new Vector3($x, $y, $z))->normalize();
 	}
 
 	private function addLength(Vector3 $vector, float|int $num) : Vector3{
-		$len = $vector->length();
-		if (!($len > 0)) {
-			$len = 0;
-		}
-		$normal = $vector->normalize();
-		$normal->multiply($len + $num);
-
-		return $normal;
+		$len = max($vector->length(), 0.0);
+		return $vector->normalize()->multiply($len + $num);
 	}
 
-	private function parseLocal(Entity $entity) : Position{
-		$forward = $entity->getDirectionVector();
-		$up = $this->getUpSideDirectionVector($entity);
-		$left = $this->getLeftSideDirectionVector($entity);
+	private function asLocalPosition(Entity $entity) : Position{
+		$forward = $this->addLength($entity->getDirectionVector(), $this->z);
+		$up = $this->addLength($this->getUpSideDirectionVector($entity), $this->y);
+		$left = $this->addLength($this->getLeftSideDirectionVector($entity), $this->x);
 
-		$forward = $this->addLength($forward, $this->z);
-		$up = $this->addLength($up, $this->y);
-		$left = $this->addLength($left, $this->x);
-
-		$vec = $entity->getPosition()->addVector($forward)->addVector($up)->addVector($left)->addVector($left)->addVector($left);
-		return Position::fromObject($vec, $entity->getWorld());
+		return Position::fromObject($entity->getPosition()->addVector($forward)->addVector($up)->addVector($left), $entity->getWorld());
 	}
 }

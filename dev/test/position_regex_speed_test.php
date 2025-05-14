@@ -77,7 +77,7 @@ $tests = [
 
 foreach ($tests as $i => $test) {
 	printf("Test %2d: %s\n", $i + 1, $test);
-	dump(ParameterParser::parsePosition($test));
+	dump(ParameterParser::parsePosition2($test));
 }
 
 $benchmarks = [];
