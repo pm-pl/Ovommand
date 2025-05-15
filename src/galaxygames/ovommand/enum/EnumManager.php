@@ -32,10 +32,10 @@ final class EnumManager{
 		try {
 			GlobalEnumPool::addEnums($this->ovommandHook, ...$enums);
 		} catch (OvommandEnumPoolException $e) {
-			match ($e->getCode()) {
-				OvommandEnumPoolException::ENUM_ALREADY_EXISTED => throw new EnumException(MessageParser::EXCEPTION_ENUM_ALREADY_EXISTED->value, EnumException::ENUM_ALREADY_EXISTED),
-				default => throw $e
-			};
+			if ($e->getCode() === OvommandEnumPoolException::ENUM_ALREADY_EXISTED) {
+				throw new EnumException(Messages::EXCEPTION_ENUM_ALREADY_EXISTED->value, EnumException::ENUM_ALREADY_EXISTED);
+			}
+			throw $e;
 		}
 	}
 
