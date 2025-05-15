@@ -6,10 +6,10 @@ namespace galaxygames\ovommand;
 use galaxygames\ovommand\exception\CommandException;
 use galaxygames\ovommand\exception\ParameterException;
 use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 use galaxygames\ovommand\parameter\result\BaseResult;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
-use galaxygames\ovommand\parameter\TextParameter;
-use galaxygames\ovommand\utils\BrokenSyntaxParser;
+use galaxygames\ovommand\utils\BrokenSyntaxHelper;
 use galaxygames\ovommand\utils\Messages;
 use galaxygames\ovommand\utils\Utils;
 use pocketmine\command\Command;
@@ -66,9 +66,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	}
 
 	/** @return BaseSubCommand[] */
-	public function getSubCommands() : array{
-		return $this->subCommands;
-	}
+	public function getSubCommands() : array{ return $this->subCommands; }
 
 	/**
 	 * Registers parameters as an overloading, keeping the input order and enforcing rules: no non-optional after optional,
@@ -82,7 +80,7 @@ abstract class Ovommand extends Command implements IOvommand{
 			if ($hasTextParameter) {
 				throw new ParameterException(Messages::EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER->value, ParameterException::PARAMETER_AFTER_TEXT_PARAMETER);
 			}
-			if ($parameter instanceof TextParameter) {
+			if ($parameter->getNetworkType() === ParameterTypes::TEXT) {
 				$hasTextParameter = true;
 			}
 			if ($parameter->isOptional()) {
@@ -247,15 +245,6 @@ abstract class Ovommand extends Command implements IOvommand{
 			if ($arg instanceof BrokenSyntaxResult) {
 				$message = BrokenSyntaxParser::parseFromBrokenSyntaxResult($arg, BrokenSyntaxParser::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxParser::SYNTAX_TRIMMED, $nonParsedArgs);
 				$message instanceof Translatable ? $message->prefix(TextFormat::RED) : $message = TextFormat::RED . $message;
-//				$sender->sendMessage(
-//					match($arg->getCode()) {
-//						BrokenSyntaxResult::CODE_BROKEN_SYNTAX => "Broken syntax!",
-//						BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS => "Not enough inputs!",
-//						BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS => "Too much inputs!",
-//						BrokenSyntaxResult::CODE_INVALID_INPUTS => "Invalid inputs!",
-//						default => "Unknown code report!"
-//					}
-//				); //TODO: remove debug msg
 				if ($this->doSendingSyntaxWarning) {
 					$sender->sendMessage($message);
 				}
@@ -280,7 +269,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function getConstraints() : array{ return $this->constraints; }
 
 	public function getUsage() : string{
-		$usage = $this->usageMessage;
+		$usage = parent::getUsage();
 		if ($usage instanceof Translatable) {
 			return $usage->getText();
 		}
