@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace galaxygames\ovommand\parameter\result;
 
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use shared\galaxygames\ovommand\fetus\result\IFailedResult;
 
 class BrokenSyntaxResult extends BaseResult implements IFailedResult{
@@ -56,7 +56,7 @@ class BrokenSyntaxResult extends BaseResult implements IFailedResult{
 			self::CODE_NOT_ENOUGH_INPUTS => self::CODE_NOT_ENOUGH_INPUTS,
 			self::CODE_TOO_MUCH_INPUTS => self::CODE_TOO_MUCH_INPUTS,
 			self::CODE_INVALID_INPUTS => self::CODE_INVALID_INPUTS,
-			default => throw new \InvalidArgumentException(MessageParser::EXCEPTION_BROKEN_SYNTAX_RESULT_INVALID_CODE->translate(["code" => (string) $code]))
+			default => throw new \InvalidArgumentException(Messages::EXCEPTION_BROKEN_SYNTAX_RESULT_INVALID_CODE->translate(["code" => (string) $code]))
 		};
 		return $this;
 	}

@@ -6,7 +6,7 @@ namespace galaxygames\ovommand\utils;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use pocketmine\lang\Translatable;
 
-class BrokenSyntaxParser{
+class BrokenSyntaxHelper{
 	public const MAX_TRIM_LENGTH = 9;
 	public const SYNTAX_PRINT_VANILLA = 0b0001;
 	public const SYNTAX_PRINT_OVOMMAND = 0b0010;
@@ -32,7 +32,7 @@ class BrokenSyntaxParser{
 		}
 		if ($flags & self::SYNTAX_PRINT_OVOMMAND) {
 			if ($flags & self::SYNTAX_PRINT_VANILLA) {
-				throw new \InvalidArgumentException(MessageParser::EXCEPTION_BROKEN_SYNTAX_PARSER_COLLIDED_FLAG->value);
+				throw new \InvalidArgumentException(Messages::EXCEPTION_BROKEN_SYNTAX_PARSER_COLLIDED_FLAG->value);
 			}
 			return self::createSyntaxMessage($parts[0], $brokenPart, $parts[1]);
 		}
@@ -40,7 +40,7 @@ class BrokenSyntaxParser{
 	}
 
 	private static function createSyntaxMessage(string $previous, string $brokenSyntax, string $after) : Translatable|string {
-		return MessageParser::GENERIC_SYNTAX_MESSAGE_OVO->translate([
+		return Messages::GENERIC_SYNTAX_MESSAGE_OVO->translate([
 			self::MESSAGE_TAG_PREVIOUS => $previous,
 			self::MESSAGE_TAG_BROKEN_SYNTAX => $brokenSyntax,
 			self::MESSAGE_TAG_AFTER => $after
@@ -58,7 +58,7 @@ class BrokenSyntaxParser{
 	}
 
 	public static function parseVanillaSyntaxMessage(string $previous, string $brokenPart, string $after) : Translatable|string{
-		return new Translatable(MessageParser::GENERIC_SYNTAX_MESSAGE_VANILLA->value, [$previous, $brokenPart, $after]);
+		return new Translatable(Messages::GENERIC_SYNTAX_MESSAGE_VANILLA->value, [$previous, $brokenPart, $after]);
 	}
 
 	/** @return string[] */

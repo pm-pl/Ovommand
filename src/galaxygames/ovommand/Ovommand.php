@@ -10,7 +10,7 @@ use galaxygames\ovommand\parameter\result\BaseResult;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\TextParameter;
 use galaxygames\ovommand\utils\BrokenSyntaxParser;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use galaxygames\ovommand\utils\Utils;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -52,13 +52,13 @@ abstract class Ovommand extends Command implements IOvommand{
 		foreach ($subCommands as $subCommand) {
 			$subName = $subCommand->getName();
 			if (isset($this->subCommands[$subName])) {
-				throw new CommandException(MessageParser::EXCEPTION_SUB_COMMAND_DUPLICATE_NAME->translate(["subName" => $subName]), CommandException::SUB_COMMAND_DUPLICATE_NAME);
+				throw new CommandException(Messages::EXCEPTION_SUB_COMMAND_DUPLICATE_NAME->translate(["subName" => $subName]), CommandException::SUB_COMMAND_DUPLICATE_NAME);
 			}
 			$this->subCommands[$subName] = $subCommand->setParent($this);
 			$aliases = [...$subCommand->getVisibleAliases(), ...$subCommand->getHiddenAliases()];
 			foreach ($aliases as $alias) {
 				if (isset($this->subCommands[$alias])) {
-					throw new CommandException(MessageParser::EXCEPTION_SUB_COMMAND_DUPLICATE_ALIAS->translate(["alias" => $alias]), CommandException::SUB_COMMAND_DUPLICATE_ALIAS);
+					throw new CommandException(Messages::EXCEPTION_SUB_COMMAND_DUPLICATE_ALIAS->translate(["alias" => $alias]), CommandException::SUB_COMMAND_DUPLICATE_ALIAS);
 				}
 				$this->subCommands[$alias] = $subCommand;
 			}
@@ -80,7 +80,7 @@ abstract class Ovommand extends Command implements IOvommand{
 		$hasTextParameter = false;
 		foreach ($parameters as $parameter) {
 			if ($hasTextParameter) {
-				throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER->value, ParameterException::PARAMETER_AFTER_TEXT_PARAMETER);
+				throw new ParameterException(Messages::EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER->value, ParameterException::PARAMETER_AFTER_TEXT_PARAMETER);
 			}
 			if ($parameter instanceof TextParameter) {
 				$hasTextParameter = true;
@@ -88,7 +88,7 @@ abstract class Ovommand extends Command implements IOvommand{
 			if ($parameter->isOptional()) {
 				$hasOptionalParameter = true;
 			} elseif ($hasOptionalParameter) {
-				throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL->value, ParameterException::PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL);
+				throw new ParameterException(Messages::EXCEPTION_PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL->value, ParameterException::PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL);
 			}
 			$this->overloads[$this->currentOverloadId][] = $parameter;
 		}

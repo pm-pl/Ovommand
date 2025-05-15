@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace galaxygames\ovommand\constraint;
 
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use pocketmine\command\CommandSender;
 use pocketmine\console\ConsoleCommandSender;
 use pocketmine\utils\TextFormat;
@@ -15,7 +15,7 @@ class ConsoleRequiredConstraint extends BaseConstraint{
 	}
 
 	public function onFailure(CommandSender $sender, string $aliasUsed, array $args) : void{
-		$sender->sendMessage(TextFormat::RED . MessageParser::CONSTRAINT_CONSOLE_FAILURE->value);
+		$sender->sendMessage(TextFormat::RED . Messages::CONSTRAINT_CONSOLE_FAILURE->value);
 	}
 
 	public function isVisibleTo(CommandSender $sender) : bool{

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace galaxygames\ovommand\utils;
 
-enum MessageParser : string{
+enum Messages : string{
 	case GENERIC_SYNTAX_MESSAGE_VANILLA = "commands.generic.syntax";
 	case GENERIC_SYNTAX_MESSAGE_OVO = "Syntax error: Unexpected \"{broken_syntax}\": at \"{previous}>>{broken_syntax}<<{after}\"";
 

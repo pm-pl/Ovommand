@@ -7,7 +7,7 @@ use galaxygames\ovommand\exception\ParameterException;
 use galaxygames\ovommand\parameter\result\BaseResult;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use shared\galaxygames\ovommand\fetus\IParameter;
 use shared\galaxygames\ovommand\fetus\result\IResult;
@@ -50,7 +50,7 @@ abstract class BaseParameter implements IParameter{
 	private function setFlag(int $flag) : void{
 		$this->flag = match ($flag) {
 			0, 1 => $flag,
-			default => throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_INVALID_FLAG->translate(['flag' => (string) $flag]), ParameterException::PARAMETER_INVALID_FLAG)
+			default => throw new ParameterException(Messages::EXCEPTION_PARAMETER_INVALID_FLAG->translate(['flag' => (string) $flag]), ParameterException::PARAMETER_INVALID_FLAG)
 		};
 	}
 

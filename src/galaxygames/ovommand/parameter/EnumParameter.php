@@ -8,7 +8,7 @@ use galaxygames\ovommand\exception\ParameterException;
 use galaxygames\ovommand\OvommandHook;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use shared\galaxygames\ovommand\fetus\enum\IDynamicEnum;
 use shared\galaxygames\ovommand\fetus\enum\IStaticEnum;
@@ -23,7 +23,7 @@ class EnumParameter extends BaseParameter{
 			if ($enumName instanceof DefaultEnums) {
 				$enumName = $enumName->value;
 			}
-			throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_UNKNOWN_ENUM->translate(["enumName" => $enumName, "enumType" => $isSoft ? "soft" : "hard"]), ParameterException::PARAMETER_UNKNOWN_ENUM);
+			throw new ParameterException(Messages::EXCEPTION_PARAMETER_UNKNOWN_ENUM->translate(["enumName" => $enumName, "enumType" => $isSoft ? "soft" : "hard"]), ParameterException::PARAMETER_UNKNOWN_ENUM);
 		}
 		$this->enum = $enum;
 		parent::__construct($name, $optional, $flag);
