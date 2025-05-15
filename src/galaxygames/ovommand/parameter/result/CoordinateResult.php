@@ -9,9 +9,9 @@ use pocketmine\math\Vector3;
 use pocketmine\world\Position;
 
 final class CoordinateResult extends BaseResult implements \shared\galaxygames\ovommand\fetus\result\ISucceedResult{
-	public const TYPE_DEFAULT  = 0; //number
+	public const TYPE_DEFAULT = 0; //number
 	public const TYPE_RELATIVE = 1; //tilde notation
-	public const TYPE_LOCAL    = 2; //caret notation
+	public const TYPE_LOCAL = 2; //caret notation
 
 	public function __construct(protected float|int $x = 0, protected float|int $y = 0, protected float|int $z = 0, protected int $xType = self::TYPE_DEFAULT, protected int $yType = self::TYPE_DEFAULT, protected int $zType = self::TYPE_DEFAULT){
 		if ($xType !== self::TYPE_DEFAULT && $xType !== self::TYPE_RELATIVE && $xType !== self::TYPE_LOCAL) {
@@ -37,8 +37,8 @@ final class CoordinateResult extends BaseResult implements \shared\galaxygames\o
 		return new CoordinateResult(0, 0, 0, self::TYPE_RELATIVE, self::TYPE_RELATIVE, self::TYPE_RELATIVE);
 	}
 
-	public function __toString(){
-		return "Coordinates(x=" . $this->x . ",y=" . $this->y . ",z=" . $this->z . ",xType=" . $this->xType . ",yType=" . $this->y . ",zType=" . $this->zType . ")";
+	public function __toString() : string{
+		return "Coordinates(x=" . $this->x . ",y=" . $this->y . ",z=" . $this->z . ",xType=" . $this->xType . ",yType=" . $this->yType . ",zType=" . $this->zType . ")";
 	}
 
 	public function asPosition(Entity $entity = null) : Position{
