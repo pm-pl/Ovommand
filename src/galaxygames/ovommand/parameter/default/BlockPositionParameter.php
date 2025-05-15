@@ -1,25 +1,26 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\default;
 
+use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\CoordinateResult;
 
-class PositionParameter extends BaseParameter{
+class BlockPositionParameter extends BaseParameter{
 	public function getValueName() : string{ return "x y z"; }
-	public function getNetworkType() : ParameterTypes{ return ParameterTypes::POSITION; }
+	public function getNetworkType() : ParameterTypes{ return ParameterTypes::BLOCK_POSITION; }
 	public function hasCompactParameter() : bool{ return true; }
 	public function getSpanLength() : int{ return 3; }
 
 	public function parse(array $parameters) : CoordinateResult|BrokenSyntaxResult{
 		$parameter = implode(" ", $parameters);
-		if (!preg_match_all("/([^~^+\-\d\s]+)?([~^]?[+-]?(\d+(?:\.\d+)?)|[~^])([[:blank:]]?[^~^+\-\d\s]+)?/", $parameter, $matches)) {
+		if (!preg_match_all("/([^~^+\-\d\s]+)?([~^]?[+-]?(\d+)|[~^])([[:blank:]]?[^~^+\-\d\s]+)?/", $parameter, $matches)) {
 			return BrokenSyntaxResult::create($parameter, $parameter, $this->getValueName())
 				->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX);
 		}
-		$matchCount = count($matches[0]);
-		if ($matchCount < 3) {
+		if (count($matches[0]) < 3) {
 			return BrokenSyntaxResult::create("", $parameter, $this->getValueName())
 				->setCode(BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS);
 		}
@@ -48,16 +49,25 @@ class PositionParameter extends BaseParameter{
 			return BrokenSyntaxResult::create($xPreInvalid, $parameter, $this->getValueName())
 				->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX);
 		}
-		for ($i = 1; $i < 3; $i++) {
-			if (empty($matches[2][$i])) {
-				return BrokenSyntaxResult::create("", $parameter, $this->getValueName())
-					->setCode(BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS);
-			}
+		$xPostInvalid = $matches[4][0];
+		if (!empty($xPostInvalid)) {
+			return BrokenSyntaxResult::create($xPostInvalid, $parameter, $this->getValueName())
+				->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX)->setMatchedParameter(1);
 		}
-		if ($matchCount > 3) {
+		$yPostInvalid = $matches[4][1];
+		if (!empty($yPostInvalid)) {
+			return BrokenSyntaxResult::create($yPostInvalid, $parameter, $this->getValueName())
+				->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX)->setMatchedParameter(2);
+		}
+		$zPostInvalid = $matches[4][2];
+		if (!empty($zPostInvalid)) {
+			return BrokenSyntaxResult::create($zPostInvalid, $parameter, $this->getValueName())
+				->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX)->setMatchedParameter(3);
+		}
+		if (count($matches[0]) > 3) {
 			return BrokenSyntaxResult::create($matches[0][3], $parameter, $this->getValueName())
 				->setCode(BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS)->setMatchedParameter(3);
 		}
-		return CoordinateResult::fromData((float) $matches[3][0], (float) $matches[3][1], (float) $matches[3][2], $xType, $yType, $zType);
+		return CoordinateResult::fromData((float) $matches[3][0], (float) $matches[3][1], (float) $matches[3][2], $xType, $yType, $zType, true);
 	}
 }

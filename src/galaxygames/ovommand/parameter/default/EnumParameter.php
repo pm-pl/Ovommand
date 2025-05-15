@@ -1,11 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\default;
 
 use galaxygames\ovommand\enum\DefaultEnums;
 use galaxygames\ovommand\exception\ParameterException;
 use galaxygames\ovommand\OvommandHook;
+use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
 use galaxygames\ovommand\utils\Messages;
