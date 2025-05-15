@@ -243,7 +243,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function onPreRun(CommandSender $sender, array $args, array $nonParsedArgs = []) : bool{
 		foreach ($args as $arg) {
 			if ($arg instanceof BrokenSyntaxResult) {
-				$message = BrokenSyntaxParser::parseFromBrokenSyntaxResult($arg, BrokenSyntaxParser::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxParser::SYNTAX_TRIMMED, $nonParsedArgs);
+				$message = BrokenSyntaxHelper::parseFromBrokenSyntaxResult($arg, BrokenSyntaxHelper::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxHelper::SYNTAX_TRIMMED, $nonParsedArgs);
 				$message instanceof Translatable ? $message->prefix(TextFormat::RED) : $message = TextFormat::RED . $message;
 				if ($this->doSendingSyntaxWarning) {
 					$sender->sendMessage($message);

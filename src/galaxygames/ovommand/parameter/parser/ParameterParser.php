@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\parser;
 
-use galaxygames\ovommand\parameter\result\CoordinateResult;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult2;
+use galaxygames\ovommand\parameter\result\CoordinateResult;
 
 class ParameterParser{
 	public static function parseFloat(string $value) : float{ return floatval($value); }
@@ -59,7 +59,7 @@ class ParameterParser{
 				$matches[2][$i][0] = substr($matches[2][$i][0], 1);
 			}
 		}
-		return CoordinateResult::fromData((float) $matches[2][0], (float) $matches[2][1], (float) $matches[2][2], $xType, $yType, $zType);
+		return CoordinateResult::create((float) $matches[2][0][0], (float) $matches[2][1][0], (float) $matches[2][2][0], $xType, $yType, $zType);
 	}
 
 	public static function parsePosition2(string $value) : BrokenSyntaxResult2 | CoordinateResult{
@@ -103,6 +103,6 @@ class ParameterParser{
 				$matches[2][$i][0] = substr($matches[2][$i][0], 1);
 			}
 		}
-		return CoordinateResult::fromData((float) $matches[2][0], (float) $matches[2][1], (float) $matches[2][2], $xType, $yType, $zType);
+		return CoordinateResult::create((float) $matches[2][0][0], (float) $matches[2][1][0], (float) $matches[2][2][0], $xType, $yType, $zType);
 	}
 }

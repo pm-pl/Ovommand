@@ -28,7 +28,7 @@ enum ParameterTypes{
 	case ENUM;
 	case SOFT_ENUM;
 
-	public function value() : int{
+	public function encode() : int{
 		return match ($this) {
 			self::BLOCK_POSITION => AvailableCommandsPacket::ARG_TYPE_INT_POSITION,
 			self::BLOCK_STATES => AvailableCommandsPacket::ARG_TYPE_BLOCK_STATES,

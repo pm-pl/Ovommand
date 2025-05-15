@@ -48,7 +48,6 @@ use pocketmine\Server;
 use shared\galaxygames\ovommand\exception\OvommandHookException;
 use shared\galaxygames\ovommand\fetus\enum\IDynamicEnum;
 use shared\galaxygames\ovommand\fetus\IHookable;
-use shared\galaxygames\ovommand\GlobalEnumPool;
 use shared\galaxygames\ovommand\GlobalHookPool;
 
 final class OvommandHook implements IHookable{

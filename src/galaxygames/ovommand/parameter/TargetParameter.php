@@ -5,7 +5,6 @@ namespace galaxygames\ovommand\parameter;
 
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\TargetResult;
-use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\Server;
 
 class TargetParameter extends BaseParameter{

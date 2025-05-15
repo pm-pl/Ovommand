@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace galaxygames\ovommand\enum;
 
 use galaxygames\ovommand\exception\EnumException;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use shared\galaxygames\ovommand\fetus\enum\OvommandEnum;
 
 abstract class BaseEnum extends OvommandEnum{
