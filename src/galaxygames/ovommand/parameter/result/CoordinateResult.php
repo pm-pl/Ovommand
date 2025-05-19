@@ -41,7 +41,7 @@ final class CoordinateResult extends BaseResult implements \shared\galaxygames\o
 		return "Coordinates(x=" . $this->x . ",y=" . $this->y . ",z=" . $this->z . ",xType=" . $this->xType . ",yType=" . $this->yType . ",zType=" . $this->zType . ")";
 	}
 
-	public function asPosition(Entity $entity = null) : Position{
+	public function asPosition(?Entity $entity = null) : Position{
 		if ($this->xType !== self::TYPE_DEFAULT || $this->yType !== self::TYPE_DEFAULT || $this->zType !== self::TYPE_DEFAULT) {
 			if ($entity === null) {
 				throw new \InvalidArgumentException(Messages::EXCEPTION_COORDINATE_RESULT_ENTITY_REQUIRED->value);
@@ -54,8 +54,8 @@ final class CoordinateResult extends BaseResult implements \shared\galaxygames\o
 		return new Position($this->x, $this->y, $this->z, $entity?->getWorld());
 	}
 
-	public function asBlockPosition(Entity $entity = null) : Position{
-		return Position::fromObject($this->asPosition($entity)->floor(), $entity->getWorld());
+	public function asBlockPosition(?Entity $entity = null) : Position{
+		return Position::fromObject($this->asPosition($entity)->floor(), $entity?->getWorld());
 	}
 
 	private function asRelativePosition(Entity $entity) : Position{

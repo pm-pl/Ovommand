@@ -16,8 +16,8 @@ class BrokenSyntaxResult2 extends BaseResult implements IFailedResult{
 
 	public function __construct(protected string $fullSyntax = "", protected string $brokenSyntax = "", protected int $offset = 0, protected string $expectedType = "") {}
 
-	public static function create(string $fullSyntax = "", string $brokenSyntax = "", int $offset = 0, string $expectedType = "", string $preLabel = "") : self{
-		return new BrokenSyntaxResult2($fullSyntax, $brokenSyntax, $offset, $expectedType, $preLabel);
+	public static function create(string $fullSyntax = "", string $brokenSyntax = "", int $offset = 0, string $expectedType = "") : self{
+		return new BrokenSyntaxResult2($fullSyntax, $brokenSyntax, $offset, $expectedType);
 	}
 
 	public function getFullSyntax() : string{ return $this->fullSyntax; }

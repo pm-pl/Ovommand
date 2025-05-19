@@ -47,6 +47,7 @@ class BrokenSyntaxHelper{
 		]);
 	}
 
+	/** @param array<string> $parts */
 	private static function trimParts(array $parts) : array {
 		if (strlen($parts[0]) > self::MAX_TRIM_LENGTH) {
 			$parts[0] = substr($parts[0], -self::MAX_TRIM_LENGTH);
