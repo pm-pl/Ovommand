@@ -39,17 +39,19 @@ abstract class Ovommand extends Command implements IOvommand{
 			$this->setPermission($permission);
 		}
 		$this->setup();
-		if ($this->getUsage() === "") {
-			$this->setUsage($usageMessage ?? $this->generateUsage());
-		}
 	}
 
-	protected function generateUsage() : string{
-		return Utils::implode($this->generateUsageList(), "\n- /" . $this->getName() . " ");
+	protected function generateUsage(string $label) : string{
+		return Utils::implode($this->generateUsageList(), "\n- /$label ");
 	}
 
-	public function registerSubCommands(BaseSubCommand ...$subCommands) : void{
-		foreach ($subCommands as $subCommand) {
+	public function registerSubCommand(BaseSubCommand ...$subCommand) : void{
+		$this->registerSubCommands($subCommand);
+	}
+
+	/** @param array $subCommands */
+	public function registerSubCommands(array $subCommands) : void{
+		foreach ($subCommands as $name => $subCommand) {
 			$subName = $subCommand->getName();
 			if (isset($this->subCommands[$subName])) {
 				throw new CommandException(Messages::EXCEPTION_SUB_COMMAND_DUPLICATE_NAME->translate(["subName" => $subName]), CommandException::SUB_COMMAND_DUPLICATE_NAME);
