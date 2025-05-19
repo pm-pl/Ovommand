@@ -1,14 +1,8 @@
 <?php
 declare(strict_types=1);
 
-function test_parse_speed(string $input, string $pattern) : array {
-	preg_match_all($pattern, $input, $matches);
-	return $matches;
-//	var_dump($nunOfMatches);
-}
-
 require_once "../../vendor/autoload.php";
-require_once "../../src/galaxygames/ovommand/parameter/ParameterParser.php";
+require_once "../../src/galaxygames/ovommand/parameter/parser/ParameterParser.php";
 
 use galaxygames\ovommand\parameter\parser\ParameterParser;
 
@@ -53,12 +47,18 @@ $patterns = [
 ];
 
 $tests = [
+	"~.13 1213 2123",
+	"~-.0002 -13.23 +23",
 	"13.13 -12.54 13123",
 	"891749248749712498798279442142141242187249847 -124987282712412412412897489271449271456 918247981274987129874917249712974719842798712974124789",
 	"121239821798729879723313309231208201038108301803180381083081083108308038109380183018038108038103801803810948017964917648716481848 12310831083080381093801830180381080381038018038109480179649176487164818481231232131234414124.2124217648712498874122141241 124124124124124891.312412412746782618746287624142244212",
 	"1321319873981739871983718973981739172 .212398127387198731 1.39873219739817398172912",
 	"~ ~ ~",
 	"~~~",
+	"~^~",
+	"~^^",
+	"^ ^^",
+	"^~ ~",
 	"~ ~~",
 	"~~ ~",
 	"~13812739718973911212331 ~ ~1131318761786.812386132798343",
@@ -76,18 +76,51 @@ $tests = [
 	"&--------12312312317123123131283617863--------~12313112313123a--asdjhjksahdkjhak123123131232312313jdhakjshdka-------++++~.1321232113 ~123.123123123123",
 ];
 
-foreach ($tests as $i => $test) {
-	printf("Test %2d: %s\n", $i + 1, $test);
-	dump(ParameterParser::parsePosition2($test));
-//	dump(ParameterParser::parsePosition($test));
-}
-
-$benchmarks = [];
-
 const RUN_PER_TEST = 500000;
 const RUN_WARM_UP = 10;
 
 gc_disable();
+
+foreach ($tests as $i => $test) {
+	printf("Test 1 %2d: %s\n", $i + 1, $test);
+//	dump(ParameterParser::parsePosition($test));
+	$result = null;
+	for ($i = 0; $i < RUN_WARM_UP; ++$i) {
+		$result = ParameterParser::parsePosition($test);
+		$result = ParameterParser::parsePosition2($test);
+//		$result = ParameterParser::parsePosition3($test);
+	}
+//	dump($result);
+	$runtime = hrtime(true);
+	for ($i = 0; $i < RUN_PER_TEST; ++$i) {
+		$result = ParameterParser::parsePosition($test);
+	}
+	$runtime = hrtime(true) - $runtime;
+	printf("R1 : %12.6f ms\n", $runtime / 1e6);
+
+	$runtime = hrtime(true);
+	for ($i = 0; $i < RUN_PER_TEST; ++$i) {
+		$result = ParameterParser::parsePosition2($test);
+	}
+	$runtime = hrtime(true) - $runtime;
+	printf("R2 : %12.6f ms\n", $runtime / 1e6);
+
+	$runtime = hrtime(true);
+	for ($i = 0; $i < RUN_PER_TEST; ++$i) {
+		$result = ParameterParser::parsePosition2b($test);
+	}
+	$runtime = hrtime(true) - $runtime;
+	printf("R2b: %12.6f ms\n", $runtime / 1e6);
+
+//	$runtime = hrtime(true);
+//	for ($i = 0; $i < RUN_PER_TEST; ++$i) {
+//		$result = ParameterParser::parsePosition3($test);
+//	}
+//	$runtime = hrtime(true) - $runtime;
+//	printf("R3 : %.6f ms\n", $runtime / 1e6);
+}
+
+$benchmarks = [];
 
 foreach ($tests as $n => $test) {
 	usleep(10);

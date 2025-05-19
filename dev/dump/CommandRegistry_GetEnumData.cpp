@@ -1,49 +1,54 @@
+/**
+ * Resolves and retrieves enum data from the CommandRegistry using binary search.
+ *
+ * This function performs a lookup operation to find enum data based on the provided parse token.
+ * It uses a binary search algorithm to efficiently locate the matching enum value in the registry's
+ * internal mapping table.
+ *
+ * @param this         Pointer to the current CommandRegistry instance that contains the enum mappings
+ * @param parseToken   Pointer to a ParseToken structure containing the token information needed for enum resolution
+ *
+ * @return The resolved enum value associated with the parse token
+ */
 unsigned __int64 __fastcall CommandRegistry::getEnumData(
-    CommandRegistry *this,                             // Pointer to the current CommandRegistry instance.
-    const struct CommandRegistry::ParseToken *a2       // Pointer to a ParseToken structure which contains the information needed to resolve the enum.
-)
-{
-    unsigned __int64 v2; // Temporary variable holding a masked value derived from a field in the token.
-    unsigned __int64 v3; // Hash/index value computed from the masked token data.
-    __int64 v4;          // Base pointer to the data structure where enum mappings are stored.
-    __int64 v5;          // Start pointer used in a binary search to locate the resolved enum value.
-    __int64 v6;          // The remaining range (or search space) size during the binary search.
+    CommandRegistry* this,
+    const struct CommandRegistry::ParseToken* parseToken
+) {
+    // Extract the masked value from the parse token
+    // This value serves as the search key for finding the matching enum
+    unsigned __int64 maskedTokenValue =
+        *(int*)(*(_QWORD*)parseToken + 36LL) & 0xFFFFFFFFF80FFFFFuLL;
 
-    // Extract a masked value from the ParseToken, located at an offset of +36 in the token data structure.
-    // The mask is applied to limit the bits (possibly to isolate specific encoded data).
-    v2 = *(int *)(*(_QWORD *)a2 + 36LL) & 0xFFFFFFFFF80FFFFFuLL;
+    // Calculate the index into the mapping table
+    // The index is derived from another masked token field multiplied by 9
+    unsigned __int64 mappingTableIndex =
+        9 * (*((int*)parseToken + 9) & 0xFFFFFFFFF80FFFFFuLL);
 
-    // Perform another masked operation on a field in the ParseToken, specifically the field at offset +9.
-    // Multiply this masked result by 9 to calculate an index or offset used for further lookup.
-    v3 = 9 * (*((int *)a2 + 9) & 0xFFFFFFFFF80FFFFFuLL);
+    // Get the base pointer to the enum mapping table
+    __int64 mappingTableBase = *((_QWORD*)this + 27);
 
-    // Access an internal mapping table in the CommandRegistry object.
-    // This table is assumed to contain data structures or arrays for enum resolution.
-    v4 = *((_QWORD *)this + 27);
+    // Initialize binary search boundaries
+    __int64 searchRangeStart = *(_QWORD*)(mappingTableBase + 8 * mappingTableIndex + 48);
+    __int64 elementsInRange = (*(_QWORD*)(mappingTableBase + 8 * mappingTableIndex + 56) - searchRangeStart) >> 4;
 
-    // Get the starting pointer (v5) and range size (v6) for performing a binary search.
-    v5 = *(_QWORD *)(v4 + 8 * v3 + 48);                  // Start of the search range.
-    v6 = (*(_QWORD *)(v4 + 8 * v3 + 56) - v5) >> 4;      // Number of possible entries in the range (size / 16 bytes per entry).
+    // Perform binary search to find the matching enum value
+    while (elementsInRange > 0) {
+        // Calculate the middle element index
+        __int64 midPoint = elementsInRange >> 1;
+        __int64 midElementValue = *(_QWORD*)(searchRangeStart + 16 * midPoint);
 
-    // Perform a binary search to find the enum value that matches the masked value `v2`.
-    while (v6 > 0) // While there are elements left to search in the range...
-    {
-        // Compare the current middle value in the search range with v2.
-        if (*(_QWORD *)(v5 + 16 * (v6 >> 1)) >= v2) 
-        {
-            v6 >>= 1; // Narrow the search range to the first half if the middle value is greater or equal to v2.
-        }
-        else 
-        {
-            // Move the start pointer (v5) forward to the second half of the remaining range.
-            v5 += 16 * (v6 >> 1) + 16;
-
-            // Reduce the range size by accounting for the split and the middle element.
-            v6 += -1 - (v6 >> 1);
+        if (midElementValue >= maskedTokenValue) {
+            // Search in the lower half if middle value is greater or equal
+            elementsInRange = midPoint;
+        } else {
+            // Search in the upper half if middle value is smaller
+            // Move start pointer past the middle element
+            searchRangeStart += 16 * midPoint + 16;
+            // Adjust remaining range size
+            elementsInRange = elementsInRange - 1 - midPoint;
         }
     }
 
-    // At this point, v5 should point to the memory location holding the resolved enum data.
-    // Return the resolved enum value stored at (v5 + 8).
-    return *(_QWORD *)(v5 + 8);
+    // Return the found enum value, stored 8 bytes offset from the final position
+    return *(_QWORD*)(searchRangeStart + 8);
 }
