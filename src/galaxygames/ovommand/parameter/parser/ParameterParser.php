@@ -92,7 +92,7 @@ class ParameterParser{
 		if (!preg_match_all(self::REGEX_POSITION, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX); // only do this with input being a continuous word
 		}
-		/** @var array<int, array<int, array<int, int|string>>> $matches */
+		/** @var list<array<int, array{0:string,1:int}>> $matches */
 //		dump($matches);
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
@@ -138,8 +138,7 @@ class ParameterParser{
 //		if (!preg_match_all("/([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)([~^]?[+-]?\d+\.?\d*|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)/", $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<int, array<int, array<int, int|string>>> $matches */
-//		dump($matches);
+		/** @var list<array<int, array{0:string,1:int}>> $matches */
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
 			return BrokenSyntaxResult2::create($value, "", strlen($value), expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_NOT_ENOUGH_INPUTS);
