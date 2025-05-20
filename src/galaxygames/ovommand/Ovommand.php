@@ -23,7 +23,7 @@ use shared\galaxygames\ovommand\fetus\IOvommand;
 abstract class Ovommand extends Command implements IOvommand{
 	/** @var BaseConstraint[] */
 	protected array $constraints = [];
-	/** @var BaseSubCommand[] */
+	/** @var Ovommand[] */
 	protected array $subCommands = [];
 	/** @var BaseParameter[][] */
 	protected array $overloads = [];
@@ -32,9 +32,8 @@ abstract class Ovommand extends Command implements IOvommand{
 	protected bool $doSendingUsageMessage = false;
 	protected bool $doCompactSubCommandAliases = false;
 
-	public function __construct(string $name, Translatable|string $description = "", ?string $permission = null, Translatable|string|null $usageMessage = null, array $aliases = []){
-		parent::__construct($name, $description, "", $aliases);
-
+	public function __construct(Translatable|string $description = "", Translatable|string|null $usageMessage = null, ?string $permission = null){
+		parent::__construct($description, $usageMessage);
 		if ($permission !== null) {
 			$this->setPermission($permission);
 		}
@@ -42,32 +41,30 @@ abstract class Ovommand extends Command implements IOvommand{
 	}
 
 	protected function generateUsage(string $label) : string{
-		return Utils::implode($this->generateUsageList(), "\n- /$label ");
+		return Utils::implode($this->generateUsageList($label), "\n- /$label ");
 	}
 
-	public function registerSubCommand(BaseSubCommand ...$subCommand) : void{
-		$this->registerSubCommands($subCommand);
+	public function registerSubCommand(Ovommand $subCommand, bool $overwrite = false) : void{
+		$this->registerSubCommands([$subCommand], $overwrite);
 	}
 
-	/** @param array $subCommands */
-	public function registerSubCommands(array $subCommands) : void{
+	/**
+	 * @param Ovommand[] $subCommands
+	 * @param bool $overwrite
+	 */
+	public function registerSubCommands(array $subCommands, bool $overwrite = false) : void{
 		foreach ($subCommands as $name => $subCommand) {
-			$subName = $subCommand->getName();
-			if (isset($this->subCommands[$subName])) {
-				throw new CommandException(Messages::EXCEPTION_SUB_COMMAND_DUPLICATE_NAME->translate(["subName" => $subName]), CommandException::SUB_COMMAND_DUPLICATE_NAME);
+			if ($subCommand === $this) {
+				throw new CommandException("Cannot register a subcommand to itself", CommandException::SUB_COMMAND_REGISTER_SELF); // TODO: Proper message
 			}
-			$this->subCommands[$subName] = $subCommand->setParent($this);
-			$aliases = [...$subCommand->getVisibleAliases(), ...$subCommand->getHiddenAliases()];
-			foreach ($aliases as $alias) {
-				if (isset($this->subCommands[$alias])) {
-					throw new CommandException(Messages::EXCEPTION_SUB_COMMAND_DUPLICATE_ALIAS->translate(["alias" => $alias]), CommandException::SUB_COMMAND_DUPLICATE_ALIAS);
-				}
-				$this->subCommands[$alias] = $subCommand;
+			if (isset($this->subCommands[$name]) && !$overwrite) {
+				throw new CommandException(Messages::EXCEPTION_SUBCOMMAND_ALREADY_EXISTED->translate(['name' => $name]));
 			}
+			$this->subCommands[$name] = $subCommand;
 		}
 	}
 
-	/** @return BaseSubCommand[] */
+	/** @return Ovommand[] */
 	public function getSubCommands() : array{ return $this->subCommands; }
 
 	/**
@@ -173,7 +170,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	 * @param string $preLabel Return a string combined of its parent-label with the current label
 	 */
 	final public function execute(CommandSender $sender, string $commandLabel, array $args, string $preLabel = "") : void{
-		if (!$this->testPermission($sender) && !$this->onPermissionRejected($sender)) {
+		if (!$this->testPermission($commandLabel, $sender) && !$this->onPermissionRejected($sender)) {
 			return;
 		}
 		foreach ($this->constraints as $constraint) {
@@ -214,10 +211,10 @@ abstract class Ovommand extends Command implements IOvommand{
 	}
 
 	/** @return list<string> */
-	public function generateUsageList() : array{
+	public function generateUsageList(string $label) : array{
 		$usages = [];
 		foreach ($this->subCommands as $name => $subCommand) {
-			if ($name === $subCommand->getName()) {
+			if ($subCommand->isPreferredAlias($name)) {
 				$subCommandUsageList = $subCommand->generateUsageList();
 				array_push($usages, ...array_map(static fn(string $input) => "$name $input", $subCommandUsageList));
 				foreach ($subCommand->getVisibleAliases() as $alias) {
