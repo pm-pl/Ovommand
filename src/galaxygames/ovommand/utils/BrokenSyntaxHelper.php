@@ -6,7 +6,7 @@ namespace galaxygames\ovommand\utils;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use pocketmine\lang\Translatable;
 
-class BrokenSyntaxParser{
+class BrokenSyntaxHelper{
 	public const MAX_TRIM_LENGTH = 9;
 	public const SYNTAX_PRINT_VANILLA = 0b0001;
 	public const SYNTAX_PRINT_OVOMMAND = 0b0010;
@@ -17,11 +17,11 @@ class BrokenSyntaxParser{
 	public const MESSAGE_TAG_AFTER = "after";
 
 	/** @param string[] $nonParsedArgs */
-	public static function parseFromBrokenSyntaxResult(BrokenSyntaxResult $result, int $flags = self::SYNTAX_PRINT_OVOMMAND | self::SYNTAX_TRIMMED, array $nonParsedArgs = []) : Translatable|string{
+	public static function parseFromBrokenSyntaxResult(BrokenSyntaxResult $result, int $flags = self::SYNTAX_PRINT_OVOMMAND | self::SYNTAX_TRIMMED, string $preLabel = "", array $nonParsedArgs = []) : Translatable|string{
 		if ($result->getCode() === BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS) {
-			return self::createSyntaxMessage("/{$result->getPreLabel()} ", $result->getBrokenSyntax(), Utils::implode($nonParsedArgs));
+			return self::createSyntaxMessage("/{$preLabel} ", $result->getBrokenSyntax(), Utils::implode($nonParsedArgs));
 		}
-		$fullCMD = "/" . $result->getPreLabel() . " " . $result->getFullSyntax() . Utils::implode($nonParsedArgs);
+		$fullCMD = "/" . $preLabel . " " . $result->getFullSyntax() . Utils::implode($nonParsedArgs);
 		if ($result->getCode() === BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS) {
 			return self::createSyntaxMessage($fullCMD, "", "");
 		}
@@ -32,21 +32,25 @@ class BrokenSyntaxParser{
 		}
 		if ($flags & self::SYNTAX_PRINT_OVOMMAND) {
 			if ($flags & self::SYNTAX_PRINT_VANILLA) {
-				throw new \InvalidArgumentException(MessageParser::EXCEPTION_BROKEN_SYNTAX_PARSER_COLLIDED_FLAG->value);
+				throw new \InvalidArgumentException(Messages::EXCEPTION_BROKEN_SYNTAX_PARSER_COLLIDED_FLAG->value);
 			}
 			return self::createSyntaxMessage($parts[0], $brokenPart, $parts[1]);
 		}
 		return self::parseVanillaSyntaxMessage($parts[0], $brokenPart, $parts[1]);
 	}
 
-	private static function createSyntaxMessage(string $previous, string $brokenSyntax, string $after) : Translatable|string {
-		return MessageParser::GENERIC_SYNTAX_MESSAGE_OVO->translate([
+	private static function createSyntaxMessage(string $previous, string $brokenSyntax, string $after) : string {
+		return Messages::GENERIC_SYNTAX_MESSAGE_OVO->translate([
 			self::MESSAGE_TAG_PREVIOUS => $previous,
 			self::MESSAGE_TAG_BROKEN_SYNTAX => $brokenSyntax,
 			self::MESSAGE_TAG_AFTER => $after
 		]);
 	}
 
+	/**
+	 * @param string[] $parts
+	 * @return string[]
+	 */
 	private static function trimParts(array $parts) : array {
 		if (strlen($parts[0]) > self::MAX_TRIM_LENGTH) {
 			$parts[0] = substr($parts[0], -self::MAX_TRIM_LENGTH);
@@ -58,7 +62,7 @@ class BrokenSyntaxParser{
 	}
 
 	public static function parseVanillaSyntaxMessage(string $previous, string $brokenPart, string $after) : Translatable|string{
-		return new Translatable(MessageParser::GENERIC_SYNTAX_MESSAGE_VANILLA->value, [$previous, $brokenPart, $after]);
+		return new Translatable(Messages::GENERIC_SYNTAX_MESSAGE_VANILLA->value, [$previous, $brokenPart, $after]);
 	}
 
 	/** @return string[] */

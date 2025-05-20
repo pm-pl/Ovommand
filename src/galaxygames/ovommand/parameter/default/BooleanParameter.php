@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\default;
 
 use galaxygames\ovommand\enum\DefaultEnums;
 

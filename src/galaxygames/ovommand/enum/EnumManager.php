@@ -5,7 +5,7 @@ namespace galaxygames\ovommand\enum;
 
 use galaxygames\ovommand\exception\EnumException;
 use galaxygames\ovommand\OvommandHook;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use shared\galaxygames\ovommand\exception\OvommandEnumPoolException;
 use shared\galaxygames\ovommand\fetus\enum\IDynamicEnum;
 use shared\galaxygames\ovommand\fetus\enum\IStaticEnum;
@@ -23,19 +23,19 @@ final class EnumManager{
 		foreach ($enums as $enum) {
 			$enumName = $enum->getName();
 			if ($enum->isDefault()) {
-				throw new EnumException(MessageParser::EXCEPTION_ENUM_INVALID_DEFAULT->translate(["enumName" => $enumName]), EnumException::ENUM_INVALID_DEFAULT);
+				throw new EnumException(Messages::EXCEPTION_ENUM_INVALID_DEFAULT->translate(["enumName" => $enumName]), EnumException::ENUM_INVALID_DEFAULT);
 			}
 			if (trim($enumName) === '') {
-				throw new EnumException(MessageParser::EXCEPTION_ENUM_EMPTY_NAME->value, EnumException::ENUM_EMPTY_NAME);
+				throw new EnumException(Messages::EXCEPTION_ENUM_EMPTY_NAME->value, EnumException::ENUM_EMPTY_NAME);
 			}
 		}
 		try {
 			GlobalEnumPool::addEnums($this->ovommandHook, ...$enums);
 		} catch (OvommandEnumPoolException $e) {
-			match ($e->getCode()) {
-				OvommandEnumPoolException::ENUM_ALREADY_EXISTED => throw new EnumException(MessageParser::EXCEPTION_ENUM_ALREADY_EXISTED->value, EnumException::ENUM_ALREADY_EXISTED),
-				default => throw $e
-			};
+			if ($e->getCode() === OvommandEnumPoolException::ENUM_ALREADY_EXISTED) {
+				throw new EnumException(Messages::EXCEPTION_ENUM_ALREADY_EXISTED->value, EnumException::ENUM_ALREADY_EXISTED);
+			}
+			throw $e;
 		}
 	}
 

@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\default;
+
+use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 
 class TextParameter extends BaseParameter{
 	public function getValueName() : string{ return "text"; }

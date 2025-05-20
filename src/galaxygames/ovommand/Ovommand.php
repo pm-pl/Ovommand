@@ -6,11 +6,11 @@ namespace galaxygames\ovommand;
 use galaxygames\ovommand\exception\CommandException;
 use galaxygames\ovommand\exception\ParameterException;
 use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 use galaxygames\ovommand\parameter\result\BaseResult;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
-use galaxygames\ovommand\parameter\TextParameter;
-use galaxygames\ovommand\utils\BrokenSyntaxParser;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\BrokenSyntaxHelper;
+use galaxygames\ovommand\utils\Messages;
 use galaxygames\ovommand\utils\Utils;
 use pocketmine\command\Command;
 use pocketmine\command\CommandSender;
@@ -23,7 +23,7 @@ use shared\galaxygames\ovommand\fetus\IOvommand;
 abstract class Ovommand extends Command implements IOvommand{
 	/** @var BaseConstraint[] */
 	protected array $constraints = [];
-	/** @var BaseSubCommand[] */
+	/** @var Ovommand[] */
 	protected array $subCommands = [];
 	/** @var BaseParameter[][] */
 	protected array $overloads = [];
@@ -32,44 +32,40 @@ abstract class Ovommand extends Command implements IOvommand{
 	protected bool $doSendingUsageMessage = false;
 	protected bool $doCompactSubCommandAliases = false;
 
-	public function __construct(string $name, Translatable|string $description = "", ?string $permission = null, Translatable|string|null $usageMessage = null, array $aliases = []){
-		parent::__construct($name, $description, "", $aliases);
-
-		$this->setAliases(Utils::uniqueList($aliases));
+	public function __construct(Translatable|string $description = "", Translatable|string|null $usageMessage = null, ?string $permission = null){
+		parent::__construct($description, $usageMessage);
 		if ($permission !== null) {
 			$this->setPermission($permission);
 		}
 		$this->setup();
-		if ($this->usageMessage === "") {
-			$this->setUsage($usageMessage ?? $this->generateUsage());
+	}
+
+	protected function generateUsage(string $label) : string{
+		return Utils::implode($this->generateUsageList(), "\n- /$label ");
+	}
+
+	public function registerSubCommand(Ovommand $subCommand, bool $overwrite = false) : void{
+		$this->registerSubCommands([$subCommand], $overwrite);
+	}
+
+	/**
+	 * @param Ovommand[] $subCommands
+	 * @param bool $overwrite
+	 */
+	public function registerSubCommands(array $subCommands, bool $overwrite = false) : void{
+		foreach ($subCommands as $name => $subCommand) {
+			if ($subCommand === $this) {
+				throw new CommandException("Cannot register a subcommand to itself", CommandException::SUB_COMMAND_REGISTER_SELF); // TODO: Proper message
+			}
+			if (isset($this->subCommands[$name]) && !$overwrite) {
+				throw new CommandException(Messages::EXCEPTION_SUBCOMMAND_ALREADY_EXISTED->translate(['name' => $name]));
+			}
+			$this->subCommands[$name] = $subCommand;
 		}
 	}
 
-	protected function generateUsage() : string{
-		return Utils::implode($this->generateUsageList(), "\n- /" . $this->getName() . " ");
-	}
-
-	public function registerSubCommands(BaseSubCommand ...$subCommands) : void{
-		foreach ($subCommands as $subCommand) {
-			$subName = $subCommand->getName();
-			if (isset($this->subCommands[$subName])) {
-				throw new CommandException(MessageParser::EXCEPTION_SUB_COMMAND_DUPLICATE_NAME->translate(["subName" => $subName]), CommandException::SUB_COMMAND_DUPLICATE_NAME);
-			}
-			$this->subCommands[$subName] = $subCommand->setParent($this);
-			$aliases = [...$subCommand->getVisibleAliases(), ...$subCommand->getHiddenAliases()];
-			foreach ($aliases as $alias) {
-				if (isset($this->subCommands[$alias])) {
-					throw new CommandException(MessageParser::EXCEPTION_SUB_COMMAND_DUPLICATE_ALIAS->translate(["alias" => $alias]), CommandException::SUB_COMMAND_DUPLICATE_ALIAS);
-				}
-				$this->subCommands[$alias] = $subCommand;
-			}
-		}
-	}
-
-	/** @return BaseSubCommand[] */
-	public function getSubCommands() : array{
-		return $this->subCommands;
-	}
+	/** @return Ovommand[] */
+	public function getSubCommands() : array{ return $this->subCommands; }
 
 	/**
 	 * Registers parameters as an overloading, keeping the input order and enforcing rules: no non-optional after optional,
@@ -81,15 +77,15 @@ abstract class Ovommand extends Command implements IOvommand{
 		$hasTextParameter = false;
 		foreach ($parameters as $parameter) {
 			if ($hasTextParameter) {
-				throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER->value, ParameterException::PARAMETER_AFTER_TEXT_PARAMETER);
+				throw new ParameterException(Messages::EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER->value, ParameterException::PARAMETER_AFTER_TEXT_PARAMETER);
 			}
-			if ($parameter instanceof TextParameter) {
+			if ($parameter->getNetworkType() === ParameterTypes::TEXT) {
 				$hasTextParameter = true;
 			}
 			if ($parameter->isOptional()) {
 				$hasOptionalParameter = true;
 			} elseif ($hasOptionalParameter) {
-				throw new ParameterException(MessageParser::EXCEPTION_PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL->value, ParameterException::PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL);
+				throw new ParameterException(Messages::EXCEPTION_PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL->value, ParameterException::PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL);
 			}
 			$this->overloads[$this->currentOverloadId][] = $parameter;
 		}
@@ -137,7 +133,7 @@ abstract class Ovommand extends Command implements IOvommand{
 				}
 				if ($result instanceof BrokenSyntaxResult) {
 					$hasFailed = true;
-					$matchPoint += $result->getMatchedParameter();
+					$matchPoint += 1; // TODO: this 1 is temp, it's wrong btw
 					break;
 				}
 				if ($offset === $paramCount + 1 && $parameter->isOptional()) {
@@ -174,7 +170,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	 * @param string $preLabel Return a string combined of its parent-label with the current label
 	 */
 	final public function execute(CommandSender $sender, string $commandLabel, array $args, string $preLabel = "") : void{
-		if (!$this->testPermission($sender) && !$this->onPermissionRejected($sender)) {
+		if (!$this->testPermission($commandLabel, $sender) && !$this->onPermissionRejected($sender)) {
 			return;
 		}
 		foreach ($this->constraints as $constraint) {
@@ -202,7 +198,7 @@ abstract class Ovommand extends Command implements IOvommand{
 				if (!$passArg instanceof BrokenSyntaxResult) {
 					$preLabel .= Utils::implode(array_slice($args, $totalPoint, $passArg->getParsedPoint()));
 				} else {
-					$passArg->setPreLabel($preLabel);
+//					$passArg->setPreLabel($preLabel);
 				}
 				$totalPoint += $passArg->getParsedPoint();
 			}
@@ -218,13 +214,8 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function generateUsageList() : array{
 		$usages = [];
 		foreach ($this->subCommands as $name => $subCommand) {
-			if ($name === $subCommand->getName()) {
-				$subCommandUsageList = $subCommand->generateUsageList();
-				array_push($usages, ...array_map(static fn(string $input) => "$name $input", $subCommandUsageList));
-				foreach ($subCommand->getVisibleAliases() as $alias) {
-					array_push($usages, ...array_map(static fn(string $input) => "$alias $input", $subCommandUsageList));
-				}
-			}
+			$subCommandUsageList = $subCommand->generateUsageList();
+			array_push($usages, ...array_map(static fn(string $input) => "$name $input", $subCommandUsageList));
 		}
 		foreach ($this->overloads as $parameters) {
 			$param = "";
@@ -246,17 +237,8 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function onPreRun(CommandSender $sender, array $args, array $nonParsedArgs = []) : bool{
 		foreach ($args as $arg) {
 			if ($arg instanceof BrokenSyntaxResult) {
-				$message = BrokenSyntaxParser::parseFromBrokenSyntaxResult($arg, BrokenSyntaxParser::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxParser::SYNTAX_TRIMMED, $nonParsedArgs);
+				$message = BrokenSyntaxHelper::parseFromBrokenSyntaxResult($arg, BrokenSyntaxHelper::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxHelper::SYNTAX_TRIMMED, "bruh");
 				$message instanceof Translatable ? $message->prefix(TextFormat::RED) : $message = TextFormat::RED . $message;
-//				$sender->sendMessage(
-//					match($arg->getCode()) {
-//						BrokenSyntaxResult::CODE_BROKEN_SYNTAX => "Broken syntax!",
-//						BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS => "Not enough inputs!",
-//						BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS => "Too much inputs!",
-//						BrokenSyntaxResult::CODE_INVALID_INPUTS => "Invalid inputs!",
-//						default => "Unknown code report!"
-//					}
-//				); //TODO: remove debug msg
 				if ($this->doSendingSyntaxWarning) {
 					$sender->sendMessage($message);
 				}
@@ -281,11 +263,11 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function getConstraints() : array{ return $this->constraints; }
 
 	public function getUsage() : string{
-		$usage = $this->usageMessage;
+		$usage = parent::getUsage();
 		if ($usage instanceof Translatable) {
 			return $usage->getText();
 		}
-		return $usage;
+		return $usage ?? "";
 	}
 
 	public function getOwningPlugin() : Plugin{ return OvommandHook::getOwnedPlugin(); }

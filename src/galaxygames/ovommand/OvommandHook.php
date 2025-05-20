@@ -32,7 +32,7 @@ namespace galaxygames\ovommand;
 use galaxygames\ovommand\enum\DefaultEnums;
 use galaxygames\ovommand\enum\EnumManager;
 use galaxygames\ovommand\parameter\BaseParameter;
-use galaxygames\ovommand\utils\MessageParser;
+use galaxygames\ovommand\utils\Messages;
 use muqsit\simplepackethandler\SimplePacketHandler;
 use pocketmine\command\CommandSender;
 use pocketmine\event\EventPriority;
@@ -48,7 +48,6 @@ use pocketmine\Server;
 use shared\galaxygames\ovommand\exception\OvommandHookException;
 use shared\galaxygames\ovommand\fetus\enum\IDynamicEnum;
 use shared\galaxygames\ovommand\fetus\IHookable;
-use shared\galaxygames\ovommand\GlobalEnumPool;
 use shared\galaxygames\ovommand\GlobalHookPool;
 
 final class OvommandHook implements IHookable{
@@ -56,7 +55,6 @@ final class OvommandHook implements IHookable{
 	private static OvommandHook $instance;
 	private static Plugin $plugin;
 	private static bool $privacy = false;
-//	private static ?string $namespace = null;
 
 	public static function getInstance() : OvommandHook{
 		return self::$instance ?? self::register(self::getOwnedPlugin());
@@ -75,7 +73,7 @@ final class OvommandHook implements IHookable{
 				$commandMap = Server::getInstance()->getCommandMap();
 				foreach ($packet->commandData as $name => $commandData) {
 					$command = $commandMap->getCommand($name);
-					if (!$command instanceof BaseCommand) {
+					if (!$command instanceof Ovommand) {
 						continue;
 					}
 					foreach ($command->getConstraints() as $constraint) {
@@ -117,7 +115,7 @@ final class OvommandHook implements IHookable{
 	private static function generateOverloads(CommandSender $sender, Ovommand $command) : array{
 		$overloads = [];
 		foreach ($command->getSubCommands() as $label => $subCommand) {
-			if ($subCommand->getName() !== $label || !$subCommand->testPermissionSilent($sender)) { //get origin label
+			if (!$subCommand->testPermissionSilent($sender)) {
 				continue;
 			}
 			foreach ($subCommand->getConstraints() as $constraint) {
@@ -126,25 +124,13 @@ final class OvommandHook implements IHookable{
 				}
 			}
 			$enumName = "scmd#" . spl_object_id($subCommand);
-			$vAliasList = $subCommand->getVisibleAliases();
 			$scParam = CommandParameter::enum($label, new CommandEnum($enumName, [$label]), 1);
 			$overloadList = self::generateOverloads($sender, $subCommand);
 			if (empty($overloadList)) {
 				$overloads[] = new CommandOverload(false, [$scParam]);
-				foreach ($vAliasList as $alias) {
-					$overloads[] = new CommandOverload(false, [
-						CommandParameter::enum($label, new CommandEnum($enumName . $alias, [$alias]), 1)
-					]);
-				}
 			} else {
 				foreach ($overloadList as $overload) {
 					$overloads[] = new CommandOverload(false, [$scParam, ...$overload->getParameters()]);
-					foreach ($vAliasList as $alias) {
-						$overloads[] = new CommandOverload(false, [
-							CommandParameter::enum($label, new CommandEnum($enumName . $alias, [$alias]), 1)
-							, ...$overload->getParameters()
-						]);
-					}
 				}
 			}
 		}
@@ -160,7 +146,7 @@ final class OvommandHook implements IHookable{
 
 	public static function getOwnedPlugin() : Plugin{
 		if (!self::isRegistered()) {
-			throw new OvommandHookException(MessageParser::EXCEPTION_OVOMMANDHOOK_NOT_REGISTERED->value);
+			throw new OvommandHookException(Messages::EXCEPTION_OVOMMANDHOOK_NOT_REGISTERED->value);
 		}
 		return self::$plugin;
 	}

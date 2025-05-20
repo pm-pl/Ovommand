@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace galaxygames\ovommand\utils;
 
-enum MessageParser : string{
+enum Messages : string{
 	case GENERIC_SYNTAX_MESSAGE_VANILLA = "commands.generic.syntax";
 	case GENERIC_SYNTAX_MESSAGE_OVO = "Syntax error: Unexpected \"{broken_syntax}\": at \"{previous}>>{broken_syntax}<<{after}\"";
 
@@ -31,8 +31,7 @@ enum MessageParser : string{
 	case EXCEPTION_PARAMETER_NON_OPTIONAL_AFTER_OPTIONAL = "Cannot have non-optional parameters after an optional parameter";
 	case EXCEPTION_PARAMETER_AFTER_TEXT_PARAMETER = "Cannot have more parameters after TextParameter";
 
-	case EXCEPTION_SUB_COMMAND_DUPLICATE_ALIAS = "SubCommand with same alias for '{alias}' already exists";
-	case EXCEPTION_SUB_COMMAND_DUPLICATE_NAME = "SubCommand with same name for '{subName}' already exists";
+	case EXCEPTION_SUBCOMMAND_ALREADY_EXISTED = "SubCommand with that name '{name}' already registered!";
 
 	case EXCEPTION_OVOMMANDHOOK_NOT_REGISTERED = "This OvommandHook is not registered with a plugin; please hook it to a plugin before using it for your own goods.";
 

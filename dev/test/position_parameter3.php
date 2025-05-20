@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 require_once "D:\pmmp\Ovommand\\vendor\autoload.php";
 
-use galaxygames\ovommand\parameter\PositionParameter;
+use galaxygames\ovommand\parameter\default\PositionParameter;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 
 $parameter = new PositionParameter("t");

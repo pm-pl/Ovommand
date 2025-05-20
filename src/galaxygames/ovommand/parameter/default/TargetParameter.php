@@ -1,11 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace galaxygames\ovommand\parameter;
+namespace galaxygames\ovommand\parameter\default;
 
+use galaxygames\ovommand\parameter\BaseParameter;
+use galaxygames\ovommand\parameter\ParameterTypes;
 use galaxygames\ovommand\parameter\result\BrokenSyntaxResult;
 use galaxygames\ovommand\parameter\result\TargetResult;
-use pocketmine\network\mcpe\protocol\types\command\CommandParameter;
 use pocketmine\Server;
 
 class TargetParameter extends BaseParameter{
@@ -22,13 +23,12 @@ class TargetParameter extends BaseParameter{
 		$parameter = $parameters[0];
 		$groups = [];
 		if (!preg_match("/^(?:([^\n\w]*@[apres])|([^\d\n@][\w ]*))$/", $parameter, $groups)) {
-			return BrokenSyntaxResult::create($parameter, $parameter, $this->getValueName());
+			return BrokenSyntaxResult::create($parameter, $parameter, 0)->setCode(BrokenSyntaxResult::CODE_INVALID_INPUTS);
 		}
 		if (isset($groups[2])) {
 			$pName = $groups[2];
 			if (Server::getInstance()->getPlayerExact($pName) === null) {
-				return BrokenSyntaxResult::create($pName, $parameter, $this->getValueName())
-					->setCode(BrokenSyntaxResult::CODE_INVALID_INPUTS);
+				return BrokenSyntaxResult::create($parameter, $parameter, 0)->setCode(BrokenSyntaxResult::CODE_INVALID_INPUTS);
 			}
 		}
 		return match ($tag = $groups[1]) {
