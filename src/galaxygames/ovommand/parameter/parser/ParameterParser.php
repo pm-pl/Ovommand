@@ -8,8 +8,7 @@ use galaxygames\ovommand\parameter\result\CoordinateResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
 
 /**
- * @phpstan-type TypeRCapture array{0:string,1:int}
- * @phpstan-type TypeRCaptureNonEmpty array{0:non-empty-string,1:int}
+ * @phpstan-type TypeRCapture array{string,int<-1,max>}
  * @phpstan-type TypeRMatch array<TypeRCapture>
  * @phpstan-type TypeRMatchAll array<TypeRMatch>
  */
