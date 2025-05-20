@@ -32,7 +32,7 @@ Ovommand is a command parsing and handling framework for PocketMine-MP. It made 
    - - [ ] Json parameter
 4. - [x] Default enums support (player list, gamemode, boolean, etc)
 5. - [x] Constraints for commands
-6. - [x] Auto-generated usage for commands/subcommands
+6. - [ ] Usage generator for commands/subcommands
 7. - [ ] Duplicate command name handle (adding counter to the command name)
 8. - [ ] Attribute supports (temp abandoned)
 9. - [ ] CommandHelper: an easy way to create a command without class register mess
