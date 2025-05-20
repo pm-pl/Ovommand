@@ -14,28 +14,25 @@ use pocketmine\utils\Utils;
  */
 class ClosureCommand extends Ovommand{
 	/** @phpstan-var ?OvommandSetupClosure $setupClosure */
-	private ?\Closure $setupClosure = null;
+	private ?\Closure $setupClosure;
 	/** @phpstan-var ?OvommandPreRunClosure $preRunClosure */
-	private ?\Closure $preRunClosure = null;
+	private ?\Closure $preRunClosure;
 	/** @phpstan-var ?OvommandRunClosure $runClosure*/
-	private ?\Closure $runClosure = null;
+	private ?\Closure $runClosure;
 
 	/**
-	 * @phpstan-param OvommandSetupClosure $setupClosure
-	 * @phpstan-param OvommandPreRunClosure $preRunClosure
-	 * @phpstan-param OvommandRunClosure $runClosure
+	 * @phpstan-param ?OvommandSetupClosure $setupClosure
+	 * @phpstan-param ?OvommandPreRunClosure $preRunClosure
+	 * @phpstan-param ?OvommandRunClosure $runClosure
 	 */
 	public function __construct(
 		Translatable|string $description = "", Translatable|string|null $usageMessage = null, ?string $permission = null,
 		?\Closure $setupClosure = null, ?\Closure $preRunClosure = null, ?\Closure $runClosure = null
 	){
 		parent::__construct($description, $usageMessage, $permission);
+		Utils::validateCallableSignature(function (Ovommand $command) : void{}, $setupClosure);
 		Utils::validateCallableSignature(
-			function (Ovommand $command) : void{},
-			$setupClosure,
-		);
-		Utils::validateCallableSignature(
-			function (Ovommand $command, CommandSender $sender, array $args, array $nonParsedArgs) : bool{},
+			fn (Ovommand $command, CommandSender $sender, array $args, array $nonParsedArgs) : bool => true,
 			$preRunClosure,
 		);
 		Utils::validateCallableSignature(
