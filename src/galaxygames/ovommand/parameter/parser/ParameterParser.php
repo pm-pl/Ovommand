@@ -7,6 +7,11 @@ use galaxygames\ovommand\parameter\result\BrokenSyntaxResult2;
 use galaxygames\ovommand\parameter\result\CoordinateResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
 
+/**
+ * @phpstan-type TypeRegexCapture array{string,int}
+ * @phpstan-type TypeRegexMatch array<TypeRegexCapture>
+ * @phpstan-type TypeRegexMatchAll array<TypeRegexMatch>
+ */
 class ParameterParser{
 	public const REGEX_FLOAT = "/([^\d+-.]*)([+-]?\d*\.?\d+)(.*)/";
 	public const REGEX_INT = "/([^\d+-]*)([+-]?\d+)(.*)/";
@@ -21,7 +26,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_FLOAT, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<array{0:string,1:int}> $matches */
+		/** @var TypeRegexMatch $matches */
 		$preInvalid = !empty(ltrim($matches[1][0]));
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -37,7 +42,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<array{0:string,1:int}> $matches */
+		/** @var TypeRegexMatch $matches */
 		$preInvalid = !empty(ltrim($matches[1][0]));
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -53,7 +58,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT2, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<array{0:string,1:int}> $matches */
+		/** @var TypeRegexMatch $matches */
 		$preInvalid = !empty($matches[1][0]);
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -69,7 +74,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT2, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<array{0:string,1:int}> $matches */
+		/** @var TypeRegexMatch $matches */
 		$preInvalid = !empty($matches[1][0]);
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -93,7 +98,7 @@ class ParameterParser{
 		if (!preg_match_all(self::REGEX_BLOCK_POSITION, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX); // only do this with input being a continuous word
 		}
-		/** @var array<array<int, array{0:string,1:int}>> $matches */
+		/** @var TypeRegexMatchAll $matches */
 //		dump($matches);
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
@@ -137,7 +142,7 @@ class ParameterParser{
 		if (!preg_match_all(self::REGEX_POSITION, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX); // only do this with input being a continuous word
 		}
-		/** @var array<array<int, array{0:string,1:int}>> $matches */
+		/** @var TypeRegexMatchAll $matches */
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
 			return BrokenSyntaxResult2::create($value, "", strlen($value), expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_NOT_ENOUGH_INPUTS);
@@ -182,7 +187,7 @@ class ParameterParser{
 //		if (!preg_match_all("/([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)([~^]?[+-]?\d+\.?\d*|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)/", $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var array<array<int, array{0:string,1:int}>> $matches */
+		/** @var TypeRegexMatchAll $matches */
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
 			return BrokenSyntaxResult2::create($value, "", strlen($value), expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_NOT_ENOUGH_INPUTS);
