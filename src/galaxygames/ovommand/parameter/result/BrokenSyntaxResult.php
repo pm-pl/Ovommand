@@ -12,43 +12,19 @@ class BrokenSyntaxResult extends BaseResult implements IFailedResult{
 	public const CODE_TOO_MUCH_INPUTS = 2;
 	public const CODE_INVALID_INPUTS = 3;
 
-	protected int $matchedParameter = 0;
 	protected int $code = self::CODE_BROKEN_SYNTAX;
 
-	public function __construct(protected string $brokenSyntax, protected string $fullSyntax = "", protected string $expectedType = "", protected string $preLabel = ""){}
+	public function __construct(protected string $fullSyntax = "", protected string $brokenSyntax = "", protected int $offset = 0, protected string $expectedType = "") {}
 
-	public static function create(string $brokenSyntax, string $fullSyntax = "", string $expectedType = "", string $preLabel = "") : self{
-		return new BrokenSyntaxResult($brokenSyntax, $fullSyntax, $expectedType, $preLabel);
+	public static function create(string $fullSyntax = "", string $brokenSyntax = "", int $offset = 0, string $expectedType = "") : self{
+		return new BrokenSyntaxResult($fullSyntax, $brokenSyntax, $offset, $expectedType);
 	}
 
-	public function getBrokenSyntax() : string{
-		return $this->brokenSyntax;
-	}
-
-	public function getFullSyntax() : string{
-		return $this->fullSyntax;
-	}
-
-	public function setMatchedParameter(int $match = 0) : self{
-		$this->matchedParameter = $match;
-		return $this;
-	}
-
-	public function setPreLabel(string $preLabel) : void{
-		$this->preLabel = $preLabel;
-	}
-
-	public function getPreLabel() : string{
-		return $this->preLabel;
-	}
-
-	public function getMatchedParameter() : int{
-		return $this->matchedParameter;
-	}
-
-	public function getCode() : int{
-		return $this->code;
-	}
+	public function getFullSyntax() : string{ return $this->fullSyntax; }
+	public function getBrokenSyntax() : string { return $this->brokenSyntax; }
+	public function getOffset() : int { return $this->offset; }
+	public function getExpectedType() : string{ return $this->expectedType; }
+	public function getCode() : int{ return $this->code; }
 
 	public function setCode(int $code) : self{
 		$this->code = match ($code) {
@@ -59,9 +35,5 @@ class BrokenSyntaxResult extends BaseResult implements IFailedResult{
 			default => throw new \InvalidArgumentException(Messages::EXCEPTION_BROKEN_SYNTAX_RESULT_INVALID_CODE->translate(["code" => (string) $code]))
 		};
 		return $this;
-	}
-
-	public function getExpectedType() : string{
-		return $this->expectedType;
 	}
 }

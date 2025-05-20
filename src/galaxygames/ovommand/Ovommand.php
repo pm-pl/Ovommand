@@ -133,7 +133,7 @@ abstract class Ovommand extends Command implements IOvommand{
 				}
 				if ($result instanceof BrokenSyntaxResult) {
 					$hasFailed = true;
-					$matchPoint += $result->getMatchedParameter();
+					$matchPoint += 1; // TODO: this 1 is temp, it's wrong btw
 					break;
 				}
 				if ($offset === $paramCount + 1 && $parameter->isOptional()) {
@@ -198,7 +198,7 @@ abstract class Ovommand extends Command implements IOvommand{
 				if (!$passArg instanceof BrokenSyntaxResult) {
 					$preLabel .= Utils::implode(array_slice($args, $totalPoint, $passArg->getParsedPoint()));
 				} else {
-					$passArg->setPreLabel($preLabel);
+//					$passArg->setPreLabel($preLabel);
 				}
 				$totalPoint += $passArg->getParsedPoint();
 			}
