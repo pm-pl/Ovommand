@@ -24,19 +24,19 @@ Ovommand is a command parsing and handling framework for PocketMine-MP. It made 
 
 ### Features
 1. - [x] Custom command with rich customizability
-2. - [x] Custom subcommand/parameters with command enum supports
-3. - [ ] Parser for complex parameters with syntax checker
+2. - [x] Custom subcommand/parameters with command enum support
+3. - [ ] Parser for complex parameters with syntax checkers
    - - [x] Position parameter (`~~ ~`, `12 -31 ~123`, etc) - Done?
    - - [ ] Target parameter (`@a`, `@s`, etc...) - Currently unstable
    - - [x] Float, Int, Text,... parameter
    - - [ ] Json parameter
 4. - [x] Default enums support (player list, gamemode, boolean, etc)
-5. - [x] Visible/Hidden aliases for subcommands.
-6. - [x] Constraints for commands
-7. - [x] Auto-generated usage for commands/subcommands
-8. - [ ] Command namespace (from vanilla addon: `/plugin1:test`)
-9. - [ ] Duplicate command name handle (adding counter to the command name)
-10. - [ ] Attribute supports (temp abandoned)
+5. - [x] Constraints for commands
+6. - [x] Auto-generated usage for commands/subcommands
+7. - [ ] Duplicate command name handle (adding counter to the command name)
+8. - [ ] Attribute supports (temp abandoned)
+9. - [ ] CommandHelper: an easy way to create a command without class register mess
+10. - [x] Closure command
 11. - [ ] ?
 ### Requirement
 - PHP 8.2 or higher
