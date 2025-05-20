@@ -21,7 +21,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_FLOAT, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var list<array{0:string,1:int}> $matches */
+		/** @var array<array{0:string,1:int}> $matches */
 		$preInvalid = !empty(ltrim($matches[1][0]));
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -37,7 +37,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var list<array{0:string,1:int}> $matches */
+		/** @var array<array{0:string,1:int}> $matches */
 		$preInvalid = !empty(ltrim($matches[1][0]));
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -53,7 +53,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT2, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var list<array{0:string,1:int}> $matches */
+		/** @var array<array{0:string,1:int}> $matches */
 		$preInvalid = !empty($matches[1][0]);
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -69,7 +69,7 @@ class ParameterParser{
 		if (!preg_match(self::REGEX_INT2, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var list<array{0:string,1:int}> $matches */
+		/** @var array<array{0:string,1:int}> $matches */
 		$preInvalid = !empty($matches[1][0]);
 		if ($preInvalid) {
 			return BrokenSyntaxResult2::create($value, $matches[1][0], $matches[1][1], expectedType: "float")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
@@ -93,7 +93,7 @@ class ParameterParser{
 		if (!preg_match_all(self::REGEX_BLOCK_POSITION, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX); // only do this with input being a continuous word
 		}
-		/** @var list<array<int, array{0:string,1:int}>> $matches */
+		/** @var array<array<int, array{0:string,1:int}>> $matches */
 //		dump($matches);
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
@@ -137,8 +137,7 @@ class ParameterParser{
 		if (!preg_match_all(self::REGEX_POSITION, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX); // only do this with input being a continuous word
 		}
-		/** @var list<array<int, array{0:string,1:int}>> $matches */
-//		dump($matches);
+		/** @var array<array<int, array{0:string,1:int}>> $matches */
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
 			return BrokenSyntaxResult2::create($value, "", strlen($value), expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_NOT_ENOUGH_INPUTS);
@@ -183,7 +182,7 @@ class ParameterParser{
 //		if (!preg_match_all("/([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)([~^]?[+-]?\d+\.?\d*|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)/", $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult2::create($value, expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_BROKEN_SYNTAX);
 		}
-		/** @var list<array<int, array{0:string,1:int}>> $matches */
+		/** @var array<array<int, array{0:string,1:int}>> $matches */
 		$matchCount = count($matches[0]);
 		if ($matchCount < 3) {
 			return BrokenSyntaxResult2::create($value, "", strlen($value), expectedType: "position")->setCode(BrokenSyntaxResult2::CODE_NOT_ENOUGH_INPUTS);

@@ -45,9 +45,7 @@ class ClosureCommand extends Ovommand{
 	}
 
 	public function setup() : void{
-		if ($this->setupClosure !== null) {
-			($this->setupClosure)($this);
-		}
+		if ($this->setupClosure !== null) ($this->setupClosure)($this);
 	}
 
 	public function onPreRun(CommandSender $sender, array $args, array $nonParsedArgs = []) : bool{
@@ -58,6 +56,6 @@ class ClosureCommand extends Ovommand{
 	}
 
 	public function onRun(CommandSender $sender, string $label, array $args) : void{
-		$this->runClosure?->call($this, $label, $args);
+		if ($this->runClosure !== null) ($this->runClosure)($this, $label, $args);
 	}
 }
