@@ -8,7 +8,7 @@ use galaxygames\ovommand\parameter\result\CoordinateResult;
 use galaxygames\ovommand\parameter\result\ValueResult;
 
 /**
- * @phpstan-type TypeRegexCapture array{string,int}
+ * @phpstan-type TypeRegexCapture array{0:string,1:int}
  * @phpstan-type TypeRegexMatch array<TypeRegexCapture>
  * @phpstan-type TypeRegexMatchAll array<TypeRegexMatch>
  */
