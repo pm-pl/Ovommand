@@ -41,7 +41,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	}
 
 	protected function generateUsage(string $label) : string{
-		return Utils::implode($this->generateUsageList($label), "\n- /$label ");
+		return Utils::implode($this->generateUsageList(), "\n- /$label ");
 	}
 
 	public function registerSubCommand(Ovommand $subCommand, bool $overwrite = false) : void{
@@ -211,16 +211,11 @@ abstract class Ovommand extends Command implements IOvommand{
 	}
 
 	/** @return list<string> */
-	public function generateUsageList(string $label) : array{
+	public function generateUsageList() : array{
 		$usages = [];
 		foreach ($this->subCommands as $name => $subCommand) {
-			if ($subCommand->isPreferredAlias($name)) {
-				$subCommandUsageList = $subCommand->generateUsageList();
-				array_push($usages, ...array_map(static fn(string $input) => "$name $input", $subCommandUsageList));
-				foreach ($subCommand->getVisibleAliases() as $alias) {
-					array_push($usages, ...array_map(static fn(string $input) => "$alias $input", $subCommandUsageList));
-				}
-			}
+			$subCommandUsageList = $subCommand->generateUsageList();
+			array_push($usages, ...array_map(static fn(string $input) => "$name $input", $subCommandUsageList));
 		}
 		foreach ($this->overloads as $parameters) {
 			$param = "";
@@ -242,7 +237,7 @@ abstract class Ovommand extends Command implements IOvommand{
 	public function onPreRun(CommandSender $sender, array $args, array $nonParsedArgs = []) : bool{
 		foreach ($args as $arg) {
 			if ($arg instanceof BrokenSyntaxResult) {
-				$message = BrokenSyntaxHelper::parseFromBrokenSyntaxResult($arg, BrokenSyntaxHelper::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxHelper::SYNTAX_TRIMMED, $nonParsedArgs);
+				$message = BrokenSyntaxHelper::parseFromBrokenSyntaxResult($arg, BrokenSyntaxHelper::SYNTAX_PRINT_OVOMMAND | BrokenSyntaxHelper::SYNTAX_TRIMMED, "bruh");
 				$message instanceof Translatable ? $message->prefix(TextFormat::RED) : $message = TextFormat::RED . $message;
 				if ($this->doSendingSyntaxWarning) {
 					$sender->sendMessage($message);
@@ -272,7 +267,7 @@ abstract class Ovommand extends Command implements IOvommand{
 		if ($usage instanceof Translatable) {
 			return $usage->getText();
 		}
-		return $usage;
+		return $usage ?? "";
 	}
 
 	public function getOwningPlugin() : Plugin{ return OvommandHook::getOwnedPlugin(); }

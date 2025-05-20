@@ -34,10 +34,12 @@ abstract class BaseParameter implements IParameter{
 	/** @param string[] $parameters */
 	public function parse(array $parameters) : BaseResult{
 		$cParam = count($parameters);
+		$fullSyntax = implode(" ", $parameters);
 		$span = $this->getSpanLength();
 		return match (true) {
-			$cParam > $span => BrokenSyntaxResult::create($parameters[$this->getSpanLength()], implode(" ", $parameters), $this->getValueName())->setCode(BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS),
-			$cParam < $span => BrokenSyntaxResult::create("", implode(" ", $parameters), $this->getValueName())->setCode(BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS),
+			// TODO: parse the correct offset
+			$cParam > $span => BrokenSyntaxResult::create($fullSyntax, $parameters[$this->getSpanLength()], 0, $this->getValueName())->setCode(BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS),
+			$cParam < $span => BrokenSyntaxResult::create($fullSyntax, "", 0)->setCode(BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS),
 			default => ValueResult::create($parameters)
 		};
 	}

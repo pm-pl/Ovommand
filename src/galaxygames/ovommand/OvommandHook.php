@@ -55,7 +55,6 @@ final class OvommandHook implements IHookable{
 	private static OvommandHook $instance;
 	private static Plugin $plugin;
 	private static bool $privacy = false;
-//	private static ?string $namespace = null;
 
 	public static function getInstance() : OvommandHook{
 		return self::$instance ?? self::register(self::getOwnedPlugin());
@@ -74,7 +73,7 @@ final class OvommandHook implements IHookable{
 				$commandMap = Server::getInstance()->getCommandMap();
 				foreach ($packet->commandData as $name => $commandData) {
 					$command = $commandMap->getCommand($name);
-					if (!$command instanceof BaseCommand) {
+					if (!$command instanceof Ovommand) {
 						continue;
 					}
 					foreach ($command->getConstraints() as $constraint) {
@@ -116,7 +115,7 @@ final class OvommandHook implements IHookable{
 	private static function generateOverloads(CommandSender $sender, Ovommand $command) : array{
 		$overloads = [];
 		foreach ($command->getSubCommands() as $label => $subCommand) {
-			if ($subCommand->getName() !== $label || !$subCommand->testPermissionSilent($sender)) { //get origin label
+			if (!$subCommand->testPermissionSilent($sender)) {
 				continue;
 			}
 			foreach ($subCommand->getConstraints() as $constraint) {
@@ -125,25 +124,13 @@ final class OvommandHook implements IHookable{
 				}
 			}
 			$enumName = "scmd#" . spl_object_id($subCommand);
-			$vAliasList = $subCommand->getVisibleAliases();
 			$scParam = CommandParameter::enum($label, new CommandEnum($enumName, [$label]), 1);
 			$overloadList = self::generateOverloads($sender, $subCommand);
 			if (empty($overloadList)) {
 				$overloads[] = new CommandOverload(false, [$scParam]);
-				foreach ($vAliasList as $alias) {
-					$overloads[] = new CommandOverload(false, [
-						CommandParameter::enum($label, new CommandEnum($enumName . $alias, [$alias]), 1)
-					]);
-				}
 			} else {
 				foreach ($overloadList as $overload) {
 					$overloads[] = new CommandOverload(false, [$scParam, ...$overload->getParameters()]);
-					foreach ($vAliasList as $alias) {
-						$overloads[] = new CommandOverload(false, [
-							CommandParameter::enum($label, new CommandEnum($enumName . $alias, [$alias]), 1)
-							, ...$overload->getParameters()
-						]);
-					}
 				}
 			}
 		}

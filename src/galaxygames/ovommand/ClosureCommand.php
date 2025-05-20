@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace galaxygames\ovommand;
 
+use galaxygames\ovommand\parameter\result\BaseResult;
 use pocketmine\command\CommandSender;
 use pocketmine\lang\Translatable;
 use pocketmine\utils\Utils;
 
 /**
  * @phpstan-type TypeOvoSetupClosure \Closure(Ovommand $command) : void
- * @phpstan-type TypeOvoPreRunClosure \Closure(Ovommand $command, CommandSender $sender, array $args, array $nonParsedArgs) : bool
- * @phpstan-type TypeOvoRunClosure \Closure(Ovommand $command, string $label, array $args) : void
+ * @phpstan-type TypeOvoPreRunClosure \Closure(Ovommand $command, CommandSender $sender, BaseResult[] $args, list<string> $nonParsedArgs) : bool
+ * @phpstan-type TypeOvoRunClosure \Closure(Ovommand $command, string $label, BaseResult[] $args) : void
  */
 class ClosureCommand extends Ovommand{
 	/** @phpstan-var ?TypeOvoSetupClosure $setupClosure */
@@ -30,15 +31,21 @@ class ClosureCommand extends Ovommand{
 		?\Closure $setupClosure = null, ?\Closure $preRunClosure = null, ?\Closure $runClosure = null
 	){
 		parent::__construct($description, $usageMessage, $permission);
-		Utils::validateCallableSignature(function (Ovommand $command) : void{}, $setupClosure);
-		Utils::validateCallableSignature(
-			fn (Ovommand $command, CommandSender $sender, array $args, array $nonParsedArgs) : bool => true,
-			$preRunClosure,
-		);
-		Utils::validateCallableSignature(
-			function (Ovommand $command, string $label, array $args) : void{},
-			$runClosure,
-		);
+		if ($setupClosure !== null) {
+			Utils::validateCallableSignature(fn (Ovommand $command) => null, $setupClosure);
+		}
+		if ($preRunClosure !== null) {
+			Utils::validateCallableSignature(
+				fn (Ovommand $command, CommandSender $sender, array $args, array $nonParsedArgs) : bool => true,
+				$preRunClosure
+			);
+		}
+		if ($runClosure !== null) {
+			Utils::validateCallableSignature(
+				fn (Ovommand $command, string $label, array $args) => null,
+				$runClosure
+			);
+		}
 		$this->setupClosure = $setupClosure;
 		$this->preRunClosure = $preRunClosure;
 		$this->runClosure = $runClosure;

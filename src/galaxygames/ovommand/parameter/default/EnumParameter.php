@@ -45,8 +45,7 @@ class EnumParameter extends BaseParameter{
 //			return ValueResult::create($this->returnRaw ? $key : $enumValue);
 			return ValueResult::create($enumValue);
 		}
-		return BrokenSyntaxResult::create($key, $key, $this->enum->getName())
-			->setCode(BrokenSyntaxResult::CODE_INVALID_INPUTS);
+		return BrokenSyntaxResult::create($key, $key, 0)->setCode(BrokenSyntaxResult::CODE_INVALID_INPUTS);
 	}
 
 	public function getNetworkParameterData() : CommandParameter{

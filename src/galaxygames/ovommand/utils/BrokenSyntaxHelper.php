@@ -17,11 +17,11 @@ class BrokenSyntaxHelper{
 	public const MESSAGE_TAG_AFTER = "after";
 
 	/** @param string[] $nonParsedArgs */
-	public static function parseFromBrokenSyntaxResult(BrokenSyntaxResult $result, int $flags = self::SYNTAX_PRINT_OVOMMAND | self::SYNTAX_TRIMMED, array $nonParsedArgs = []) : Translatable|string{
+	public static function parseFromBrokenSyntaxResult(BrokenSyntaxResult $result, int $flags = self::SYNTAX_PRINT_OVOMMAND | self::SYNTAX_TRIMMED, string $preLabel = "", array $nonParsedArgs = []) : Translatable|string{
 		if ($result->getCode() === BrokenSyntaxResult::CODE_TOO_MUCH_INPUTS) {
-			return self::createSyntaxMessage("/{$result->getPreLabel()} ", $result->getBrokenSyntax(), Utils::implode($nonParsedArgs));
+			return self::createSyntaxMessage("/{$preLabel} ", $result->getBrokenSyntax(), Utils::implode($nonParsedArgs));
 		}
-		$fullCMD = "/" . $result->getPreLabel() . " " . $result->getFullSyntax() . Utils::implode($nonParsedArgs);
+		$fullCMD = "/" . $preLabel . " " . $result->getFullSyntax() . Utils::implode($nonParsedArgs);
 		if ($result->getCode() === BrokenSyntaxResult::CODE_NOT_ENOUGH_INPUTS) {
 			return self::createSyntaxMessage($fullCMD, "", "");
 		}
@@ -39,7 +39,7 @@ class BrokenSyntaxHelper{
 		return self::parseVanillaSyntaxMessage($parts[0], $brokenPart, $parts[1]);
 	}
 
-	private static function createSyntaxMessage(string $previous, string $brokenSyntax, string $after) : Translatable|string {
+	private static function createSyntaxMessage(string $previous, string $brokenSyntax, string $after) : string {
 		return Messages::GENERIC_SYNTAX_MESSAGE_OVO->translate([
 			self::MESSAGE_TAG_PREVIOUS => $previous,
 			self::MESSAGE_TAG_BROKEN_SYNTAX => $brokenSyntax,

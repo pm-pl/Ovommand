@@ -71,7 +71,7 @@ class ParameterParser{
 	}
 
 	public static function parseInt3(string $value) : BrokenSyntaxResult | ValueResult{
-		if (!preg_match(self::REGEX_INT2, $value, $matches, PREG_OFFSET_CAPTURE)) {
+		if (!preg_match(self::REGEX_INT3, $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult::create($value, expectedType: "float")->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX);
 		}
 		/** @var TypeRMatch $matches */
@@ -183,7 +183,7 @@ class ParameterParser{
 
 	public static function parsePosition2(string $value) : BrokenSyntaxResult | CoordinateResult{
 		// "([^\d\s~^+-]*(?:[+-]+[^\d~^]+)?)([~^]?[+-]?\d*\.?\d+|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~^]+)?)"
-		if (!preg_match_all("/([^\d\s~^+-]*(?:[+-]+[^\d~^]+)?)([~^]?[+-]?\d*\.?\d+|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~^]+)?)/", $value, $matches, PREG_OFFSET_CAPTURE)) {
+		if (!preg_match_all(self::REGEX_POSITION2, $value, $matches, PREG_OFFSET_CAPTURE)) {
 //		if (!preg_match_all("/([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)([~^]?[+-]?\d+\.?\d*|[~^])([^\d\s~^+-]*(?:[+-]+[^\d~]+)?)/", $value, $matches, PREG_OFFSET_CAPTURE)) {
 			return BrokenSyntaxResult::create($value, expectedType: "position")->setCode(BrokenSyntaxResult::CODE_BROKEN_SYNTAX);
 		}
