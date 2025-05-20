@@ -12,7 +12,7 @@ class StringParameter extends BaseParameter{
 	public function getValueName() : string{ return "string"; }
 	public function getNetworkType() : ParameterTypes{ return ParameterTypes::STRING; }
 
-	public function parse(array $parameters) : ValueResult|BrokenSyntaxResult{
+	public function parse(array $parameters) : ValueResult | BrokenSyntaxResult{
 		$result = parent::parse($parameters);
 		if ($result instanceof BrokenSyntaxResult) {
 			return $result;
